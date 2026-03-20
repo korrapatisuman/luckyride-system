@@ -22,4 +22,8 @@ public class VehicleService {
     public List<Vehicle> getAllVehicles() {
         return vehicleRepository.findAll();
     }
+
+    public void deleteVehicle(Long id) {
+        vehicleRepository.deleteById(id);
+    }
 }

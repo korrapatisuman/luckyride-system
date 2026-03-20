@@ -1,4 +1,9 @@
 import React, { useState, useEffect } from "react";
+import {
+  getVehicles,
+  addVehicleAPI,
+  deleteVehicleAPI
+} from "../services/api";
 
 function VehiclesPage() {
 
@@ -6,139 +11,234 @@ function VehiclesPage() {
   const [name, setName] = useState("");
   const [type, setType] = useState("");
   const [seats, setSeats] = useState("");
+  const [openMenu, setOpenMenu] = useState(null);
 
   useEffect(() => {
-
-    const dummyVehicles = [
-      { id: 1, name: "Auto 1", type: "Auto", seats: 3 },
-      { id: 2, name: "Traveller 1", type: "Traveller", seats: 12 },
-      { id: 3, name: "Car 1", type: "Car", seats: 5 },
-      { id: 4, name: "Car 2", type: "Car", seats: 10 }
-    ];
-
-    setVehicles(dummyVehicles);
-
+    fetchVehicles();
   }, []);
 
-  const addVehicle = () => {
+  // 🔥 FETCH VEHICLES
+  const fetchVehicles = async () => {
+    try {
+      const res = await getVehicles();
+      console.log("ADMIN VEHICLES:", res.data);
+      setVehicles(res.data || []);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    }
+  };
 
+  // ➕ ADD VEHICLE
+  const addVehicle = async () => {
     if (!name || !type || !seats) {
-      alert("Please fill all fields");
+      alert("Fill all fields");
       return;
     }
 
-    const newVehicle = {
-      id: vehicles.length + 1,
-      name,
-      type,
-      seats
-    };
+    try {
+      await addVehicleAPI({
+        vehicleName: name,
+        vehicleType: type,
+        seatingCapacity: Number(seats),
+        pricePerKm: 20, // default price (you can improve later)
+        imageUrl: null
+      });
 
-    setVehicles([...vehicles, newVehicle]);
+      fetchVehicles();
 
-    setName("");
-    setType("");
-    setSeats("");
+      // clear form
+      setName("");
+      setType("");
+      setSeats("");
+
+    } catch (err) {
+      console.error("Add error:", err);
+    }
   };
 
-  const deleteVehicle = (id) => {
-    const updated = vehicles.filter(vehicle => vehicle.id !== id);
-    setVehicles(updated);
+  // ❌ DELETE VEHICLE
+  const deleteVehicle = async (id) => {
+    try {
+      await deleteVehicleAPI(id);
+      fetchVehicles();
+    } catch (err) {
+      console.error("Delete error:", err);
+    }
   };
 
   return (
-
     <div style={styles.container}>
 
-      <h1>Vehicle Management</h1>
+      <h1 style={styles.heading}>Vehicle Management</h1>
 
-      {/* Add Vehicle Form */}
+      {/* FORM */}
+      <div style={styles.card}>
+        <div style={styles.form}>
 
-      <div style={styles.form}>
+          <input
+            style={styles.input}
+            placeholder="Vehicle Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
 
-        <input
-          placeholder="Vehicle Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+          <select
+            style={styles.input}
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+          >
+            <option value="">Select Type</option>
+            <option value="Auto">Auto</option>
+            <option value="Car">Car</option>
+            <option value="Traveller">Traveller</option>
+          </select>
 
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-        >
-          <option value="">Select Type</option>
-          <option value="Auto">Auto</option>
-          <option value="Car">Car</option>
-          <option value="Traveller">Traveller</option>
-        </select>
+          <input
+            style={styles.input}
+            placeholder="Seats"
+            value={seats}
+            onChange={(e) => setSeats(e.target.value)}
+          />
 
-        <input
-          placeholder="Seats"
-          value={seats}
-          onChange={(e) => setSeats(e.target.value)}
-        />
+          <button style={styles.addBtn} onClick={addVehicle}>
+            + Add Vehicle
+          </button>
 
-        <button onClick={addVehicle}>Add Vehicle</button>
-
+        </div>
       </div>
 
-      {/* Vehicle Table */}
+      {/* TABLE */}
+      <div style={styles.card}>
 
-      <table style={styles.table}>
+        <table style={styles.table}>
 
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Seats</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-
-          {vehicles.map((vehicle) => (
-
-            <tr key={vehicle.id}>
-              <td>{vehicle.id}</td>
-              <td>{vehicle.name}</td>
-              <td>{vehicle.type}</td>
-              <td>{vehicle.seats}</td>
-
-              <td>
-
-                <button
-                  style={styles.deleteBtn}
-                  onClick={() => deleteVehicle(vehicle.id)}
-                >
-                  Delete
-                </button>
-
-              </td>
-
+          <thead style={styles.thead}>
+            <tr>
+              <th style={styles.headerCell}>ID</th>
+              <th style={styles.headerCell}>Name</th>
+              <th style={styles.headerCell}>Type</th>
+              <th style={styles.headerCell}>Seats</th>
+              <th style={styles.headerCell}>Price/KM</th>
+              <th style={styles.headerCell}>Action</th>
             </tr>
+          </thead>
 
-          ))}
+          <tbody>
 
-        </tbody>
+            {vehicles.length === 0 ? (
+              <tr>
+                <td colSpan="6" style={{ textAlign: "center", padding: 20 }}>
+                  No vehicles found 🚗
+                </td>
+              </tr>
+            ) : (
+              vehicles.map((v) => (
 
-      </table>
+                <tr key={v.id} style={styles.row}>
+                  <td style={styles.cell}>{v.id}</td>
+                  <td style={styles.cell}>{v.vehicleName}</td>
+                  <td style={styles.cell}>{v.vehicleType}</td>
+                  <td style={styles.cell}>{v.seatingCapacity}</td>
+                  <td style={styles.cell}>₹{v.pricePerKm}</td>
+
+                 <td style={styles.cell}>
+  <div style={{ position: "relative" }}>
+    
+    {/* MENU BUTTON */}
+    <button
+      style={styles.menuBtn}
+      onClick={() =>
+        setOpenMenu(openMenu === v.id ? null : v.id)
+      }
+    >
+      ⋮
+    </button>
+
+    {/* DROPDOWN */}
+    {openMenu === v.id && (
+      <div style={styles.dropdown}>
+        
+        <button
+          style={styles.dropdownItem}
+          onClick={() => {
+            alert("Edit " + v.id);
+            setOpenMenu(null);
+          }}
+        >
+          ✏️ Edit
+        </button>
+
+        <button
+          style={styles.dropdownItemDelete}
+          onClick={() => {
+            deleteVehicle(v.id);
+            setOpenMenu(null);
+              }}
+           >
+         🗑 Delete
+        </button>
+
+                  </div>
+              )}
+                    </div>
+                 </td>
+                </tr>
+
+              ))
+            )}
+
+          </tbody>
+
+        </table>
+
+      </div>
 
     </div>
   );
 }
 
+// 🎨 STYLES
 const styles = {
 
   container: {
-    padding: "40px"
+    padding: "30px",
+    background: "#f1f5f9",
+    minHeight: "100vh"
+  },
+
+  heading: {
+    marginBottom: "20px",
+    fontSize: "26px",
+    fontWeight: "600"
+  },
+
+  card: {
+    background: "#fff",
+    padding: "20px",
+    borderRadius: "10px",
+    marginBottom: "20px",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.05)"
   },
 
   form: {
-    marginBottom: "20px",
     display: "flex",
-    gap: "10px"
+    gap: "10px",
+    flexWrap: "wrap"
+  },
+
+  input: {
+    padding: "8px",
+    borderRadius: "6px",
+    border: "1px solid #ccc"
+  },
+
+  addBtn: {
+    background: "#22c55e",
+    color: "#fff",
+    border: "none",
+    padding: "8px 14px",
+    borderRadius: "6px",
+    cursor: "pointer"
   },
 
   table: {
@@ -146,13 +246,61 @@ const styles = {
     borderCollapse: "collapse"
   },
 
-  deleteBtn: {
-    background: "red",
-    color: "white",
-    border: "none",
-    padding: "6px 12px",
-    cursor: "pointer"
-  }
+  thead: {
+    background: "#f8fafc"
+  },
+
+  headerCell: {
+    padding: "10px",
+    textAlign: "left"
+  },
+
+  row: {
+    borderBottom: "1px solid #eee"
+  },
+
+  cell: {
+    padding: "10px"
+  },
+menuBtn: {
+  background: "transparent",
+  border: "none",
+  fontSize: "20px",
+  cursor: "pointer"
+},
+
+dropdown: {
+  position: "absolute",
+  right: 0,
+  top: "25px",
+  background: "#fff",
+  border: "1px solid #ddd",
+  borderRadius: "8px",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+  overflow: "hidden",
+  minWidth: "120px",
+  zIndex: 100
+},
+
+dropdownItem: {
+  width: "100%",
+  padding: "10px",
+  border: "none",
+  background: "white",
+  textAlign: "left",
+  cursor: "pointer",
+  transition: "0.2s"
+},
+
+dropdownItemDelete: {
+  width: "100%",
+  padding: "10px",
+  border: "none",
+  background: "white",
+  color: "red",
+  textAlign: "left",
+  cursor: "pointer"
+}
 
 };
 

@@ -1,57 +1,72 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Platform } from "react-native";
+
+import LoginScreen from "../screens/LoginScreen";
+import SplashScreen from "../screens/SplashScreen";
+
+import BookingDetailsScreen from "../screens/BookingDetailsScreen";
+import PaymentScreen from "../screens/PaymentScreen";
+import TripTypeScreen from "../screens/TripTypeScreen";
+import VehicleScreen from "../screens/VehicleScreen";
+
 import BookingScreen from "../screens/BookingScreen";
 import BookingSuccessScreen from "../screens/BookingSuccessScreen";
 import HistoryScreen from "../screens/HistoryScreen";
-import HomeScreen from "../screens/HomeScreen";
-import LoginScreen from "../screens/LoginScreen";
-import MapScreen from "../screens/MapScreen";
-import SplashScreen from "../screens/SplashScreen";
-import VehicleScreen from "../screens/VehicleScreen";
+
+import MyRidesScreen from "../screens/MyRidesScreen";
+import TabNavigator from "./TabNavigator";
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
-
   return (
     <NavigationContainer>
-
       <Stack.Navigator
         initialRouteName="Splash"
         screenOptions={{ headerShown: false }}
       >
-
         {/* Splash */}
         <Stack.Screen name="Splash" component={SplashScreen} />
 
-        {/* Login */}
-        <Stack.Screen name="Login" component={LoginScreen} />
+        {/* LOGIN */}
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
+        />
 
-        {/* Home */}
-        <Stack.Screen name="Home" component={HomeScreen} />
+        {/* MAIN APP */}
+        <Stack.Screen
+          name="Main"
+          component={TabNavigator}
+          options={{ headerShown: false }}
+        />
 
-        {/* Select Vehicle */}
+        {/* Vehicle Selection */}
         <Stack.Screen name="Vehicles" component={VehicleScreen} />
+
+        {/* Trip Type */}
+        <Stack.Screen name="TripType" component={TripTypeScreen} />
+
+        {/* Booking Details */}
+        <Stack.Screen name="BookingDetails" component={BookingDetailsScreen} />
+
+        {/* Payment */}
+        <Stack.Screen name="Payment" component={PaymentScreen} />
 
         {/* Booking */}
         <Stack.Screen name="Booking" component={BookingScreen} />
 
-        {/* Ride History */}
+        {/* Booking Success */}
+        <Stack.Screen name="BookingSuccess" component={BookingSuccessScreen} />
+
+        {/* Booking History */}
         <Stack.Screen name="History" component={HistoryScreen} />
 
-        {/* Map */}
-        {Platform.OS !== "web" && (
-        <Stack.Screen name="Map" component={MapScreen} />
-     )}
-
-      <Stack.Screen
-        name="BookingSuccess"
-        component={BookingSuccessScreen}
-        />
-
+         {/* My Rides */}
+         <Stack.Screen name="MyRides" component={MyRidesScreen} />
+         
       </Stack.Navigator>
-
     </NavigationContainer>
   );
 }

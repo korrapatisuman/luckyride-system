@@ -17,13 +17,21 @@ public class VehicleController {
         this.vehicleService = vehicleService;
     }
 
-    @PostMapping("/add")
+    // ✅ GET all vehicles
+    @GetMapping
+    public List<Vehicle> getAllVehicles() {
+        return vehicleService.getAllVehicles();
+    }
+
+    // ✅ ADD vehicle (clean URL)
+    @PostMapping
     public Vehicle addVehicle(@RequestBody Vehicle vehicle) {
         return vehicleService.addVehicle(vehicle);
     }
 
-    @GetMapping
-    public List<Vehicle> getVehicles() {
-        return vehicleService.getAllVehicles();
+    // ✅ DELETE vehicle
+    @DeleteMapping("/{id}")
+    public void deleteVehicle(@PathVariable Long id) {
+        vehicleService.deleteVehicle(id);
     }
 }

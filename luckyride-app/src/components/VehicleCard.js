@@ -9,7 +9,7 @@ export default function VehicleCard({ vehicle, onSelect }) {
       <Text style={styles.name}>{vehicle.name}</Text>
 
       <View style={styles.row}>
-        <Text style={styles.label}>Day Rent:</Text>
+        <Text style={styles.label}>Base Price:</Text>
         <Text style={styles.value}>₹{vehicle.basePrice}</Text>
       </View>
 
@@ -19,13 +19,17 @@ export default function VehicleCard({ vehicle, onSelect }) {
       </View>
 
       <View style={styles.row}>
-        <Text style={styles.label}>Included Distance:</Text>
+        <Text style={styles.label}>Included KM:</Text>
         <Text style={styles.value}>{vehicle.includedKm} km</Text>
       </View>
 
       <View style={styles.row}>
-        <Text style={styles.label}>Extra Charge:</Text>
+        <Text style={styles.label}>Extra KM:</Text>
         <Text style={styles.value}>₹{vehicle.extraKmPrice}/km</Text>
+      </View>
+
+      <View style={styles.selectBtn}>
+        <Text style={styles.selectText}>Select Vehicle</Text>
       </View>
 
     </TouchableOpacity>
@@ -36,11 +40,11 @@ export default function VehicleCard({ vehicle, onSelect }) {
 const styles = StyleSheet.create({
 
   card: {
-    backgroundColor: "white",
-    padding: 18,
-    borderRadius: 12,
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 10,
     marginBottom: 15,
-    elevation: 4
+    elevation: 3
   },
 
   name: {
@@ -52,16 +56,27 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 4
+    marginVertical: 2
   },
 
   label: {
-    fontSize: 14,
     color: "#555"
   },
 
   value: {
-    fontSize: 14,
+    fontWeight: "bold"
+  },
+
+  selectBtn: {
+    marginTop: 10,
+    backgroundColor: "#000",
+    padding: 10,
+    borderRadius: 6,
+    alignItems: "center"
+  },
+
+  selectText: {
+    color: "#fff",
     fontWeight: "bold"
   }
 

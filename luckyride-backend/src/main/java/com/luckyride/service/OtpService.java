@@ -1,33 +1,36 @@
 package com.luckyride.service;
 
 import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 @Service
 public class OtpService {
 
-    private Map<String, String> otpStorage = new HashMap<>();
+    private final Map<String, String> otpStorage = new HashMap<>();
 
-    public String generateOtp(String phone) {
+    // 🔥 GENERATE OTP
+    public void generateOtp(String phone) {
 
-        Random random = new Random();
-        int otp = 1000 + random.nextInt(9000);
+        String otp = String.valueOf((int)(Math.random() * 9000) + 1000);
 
-        String otpString = String.valueOf(otp);
+        otpStorage.put(phone, otp);
 
-        otpStorage.put(phone, otpString);
-
-        System.out.println("OTP for " + phone + " : " + otpString);
-
-        return otpString;
+        // ✅ VERY IMPORTANT (THIS WAS MISSING)
+        System.out.println("🔥 OTP for " + phone + " is: " + otp);
     }
 
+    // 🔥 VERIFY OTP
     public boolean verifyOtp(String phone, String otp) {
 
         String storedOtp = otpStorage.get(phone);
 
-        return storedOtp != null && storedOtp.equals(otp);
+        if (storedOtp != null && storedOtp.equals(otp)) {
+            otpStorage.remove(phone); // optional cleanup
+            return true;
+        }
+
+        return false;
     }
 }

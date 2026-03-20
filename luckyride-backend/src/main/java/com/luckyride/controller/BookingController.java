@@ -1,48 +1,46 @@
 package com.luckyride.controller;
 
+import com.luckyride.model.Driver;
 import com.luckyride.model.Booking;
-import com.luckyride.repository.BookingRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import com.luckyride.service.BookingService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class BookingController {
 
-    @Autowired
-    private BookingRepository bookingRepository;
+    private final BookingService bookingService;
 
-    // Create Booking
-    @PostMapping
-  public Booking createBooking(@RequestBody Booking booking) {
-
-    // check if user already has active booking
-    var existingBooking =
-            bookingRepository.findByUserPhoneAndStatus(
-                    booking.getUserPhone(),
-                    "BOOKED"
-            );
-
-    if (existingBooking.isPresent()) {
-        throw new RuntimeException("User already has an active booking");
+    public BookingController(BookingService bookingService) {
+        this.bookingService = bookingService;
     }
 
-    return bookingRepository.save(booking);
-}
+    @PostMapping
+    public Booking createBooking(@RequestBody Booking booking) {
+        return bookingService.createBooking(booking);
+    }
 
-    // Get All Bookings (admin purpose)
+        // ✅ NEW (VERY IMPORTANT)
     @GetMapping
     public List<Booking> getAllBookings() {
-        return bookingRepository.findAll();
+        return bookingService.getAllBookings();
     }
 
-    // Get bookings for a specific user
     @GetMapping("/user/{phone}")
     public List<Booking> getUserBookings(@PathVariable String phone) {
-        return bookingRepository.findByUserPhone(phone);
+        return bookingService.getBookingsByUser(phone); // ✅ FIXED
+    }
+
+    @PutMapping("/{id}/assign-driver")
+    public Booking assignDriver(@PathVariable Long id, @RequestBody Driver driver) {
+        return bookingService.assignDriver(id, driver); // ✅ FIXED
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteBooking(@PathVariable Long id) {
+        bookingService.deleteBooking(id);
     }
 }

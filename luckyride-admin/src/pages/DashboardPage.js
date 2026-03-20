@@ -1,77 +1,87 @@
-import React from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  ResponsiveContainer
-} from "recharts";
-
-const data = [
-  { name: "Jan", bookings: 40 },
-  { name: "Feb", bookings: 60 },
-  { name: "Mar", bookings: 90 },
-  { name: "Apr", bookings: 70 },
-  { name: "May", bookings: 110 }
-];
+import React, { useEffect, useState } from "react";
+import { getDashboard } from "../services/api";
 
 function DashboardPage() {
+
+  const [data, setData] = useState({
+    totalBookings: 0,
+    totalVehicles: 0,
+    totalDrivers: 0,
+    totalRevenue: 0
+  });
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  const fetchDashboard = async () => {
+    try {
+      const res = await getDashboard();
+      setData(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
-    <div style={{ padding: "20px"}}>
-      <h2>Admin Dashboard</h2>
+    <div style={styles.container}>
 
-      {/* Statistics Cards */}
+      <h1 style={styles.heading}>Dashboard</h1>
 
-      <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
-        <div style={cardStyle}>
-          <h3>Total Users</h3>
-          <h1>120</h1>
-        </div>
+      <div style={styles.grid}>
 
-        <div style={cardStyle}>
-          <h3>Total Drivers</h3>
-          <h1>25</h1>
-        </div>
-
-        <div style={cardStyle}>
-          <h3>Total Vehicles</h3>
-          <h1>18</h1>
-        </div>
-
-        <div style={cardStyle}>
+        <div style={styles.card}>
           <h3>Total Bookings</h3>
-          <h1>340</h1>
+          <h2>{data.totalBookings}</h2>
         </div>
+
+        <div style={styles.card}>
+          <h3>Total Vehicles</h3>
+          <h2>{data.totalVehicles}</h2>
+        </div>
+
+        <div style={styles.card}>
+          <h3>Total Drivers</h3>
+          <h2>{data.totalDrivers}</h2>
+        </div>
+
+        <div style={styles.card}>
+          <h3>Total Revenue</h3>
+          <h2>₹ {data.totalRevenue}</h2>
+        </div>
+
       </div>
 
-      {/* Chart */}
-
-      <div style={{ marginTop: "20px", width: "100%", height: 200 }}>
-        <h3>Monthly Bookings</h3>
-
-        <ResponsiveContainer>
-          <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="bookings" fill="#1976d2" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
     </div>
   );
 }
 
-const cardStyle = {
-  flex: 1,
-  background: "#ffffff",
-  padding: "20px",
-  borderRadius: "10px",
-  boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-  textAlign: "center"
+const styles = {
+  container: {
+    padding: "30px",
+    background: "#f1f5f9",
+    minHeight: "100vh"
+  },
+
+  heading: {
+    marginBottom: "20px",
+    fontSize: "26px",
+    fontWeight: "600"
+  },
+
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "20px"
+  },
+
+  card: {
+    background: "#fff",
+    padding: "20px",
+    borderRadius: "12px",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+    textAlign: "center"
+  }
 };
 
 export default DashboardPage;
