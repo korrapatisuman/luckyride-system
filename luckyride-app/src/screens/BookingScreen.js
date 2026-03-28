@@ -22,13 +22,22 @@ export default function BookingScreen({ route, navigation }) {
 
     if (loading) return;
 
+    // ❗ SAFETY CHECK (VERY IMPORTANT)
+    if (!global.user?.phone) {
+      Alert.alert("Error", "User not logged in properly");
+      return;
+    }
+
     setLoading(true);
 
     try {
 
       const bookingData = {
         userPhone: global.user?.phone,
-        vehicleType: vehicle?.vehicleType, // ✅ FIXED
+
+        vehicleId: vehicle?.id,   // ✅ MUST ADD (backend needs this)
+
+        vehicleType: vehicle?.vehicleType,
         tripType: tripType,
         pickupDate: pickupDate,
         days: Number(days),
@@ -40,11 +49,11 @@ export default function BookingScreen({ route, navigation }) {
         dropLocation: drop || null
       };
 
-      console.log("Sending booking:", bookingData);
+      console.log("📤 Sending booking:", bookingData);
 
       const res = await API.post("/bookings", bookingData);
 
-      console.log("Booking Success:", res.data);
+      console.log("✅ Booking Success:", res.data);
 
       Alert.alert("Success", "Booking Confirmed 🚗");
 
@@ -54,12 +63,14 @@ export default function BookingScreen({ route, navigation }) {
 
     } catch (error) {
 
-      console.log(
-        "Booking error:",
-        error?.response?.data || error.message
-      );
+      const msg =
+        error?.response?.data?.message ||
+        error?.response?.data ||
+        error.message;
 
-      Alert.alert("Error", "Booking Failed ❌");
+      console.log("❌ Booking error:", msg);
+
+      Alert.alert("Booking Failed", msg || "Something went wrong");
 
     } finally {
       setLoading(false);
@@ -76,30 +87,18 @@ export default function BookingScreen({ route, navigation }) {
       <View style={styles.card}>
 
         <Text style={styles.vehicle}>
-          🚗 {vehicle?.vehicleName}
+          🚗 {vehicle?.vehicleName || "Vehicle"}
         </Text>
 
-        <Text style={styles.info}>
-          Trip: {tripType}
-        </Text>
-
-        <Text style={styles.info}>
-          Pickup: {pickup}
-        </Text>
+        <Text style={styles.info}>Trip: {tripType}</Text>
+        <Text style={styles.info}>Pickup: {pickup}</Text>
 
         {drop && (
-          <Text style={styles.info}>
-            Drop: {drop}
-          </Text>
+          <Text style={styles.info}>Drop: {drop}</Text>
         )}
 
-        <Text style={styles.info}>
-          Date: {pickupDate}
-        </Text>
-
-        <Text style={styles.info}>
-          Days: {days}
-        </Text>
+        <Text style={styles.info}>Date: {pickupDate}</Text>
+        <Text style={styles.info}>Days: {days}</Text>
 
         {distance > 0 && (
           <Text style={styles.info}>
@@ -107,9 +106,7 @@ export default function BookingScreen({ route, navigation }) {
           </Text>
         )}
 
-        <Text style={styles.price}>
-          ₹{totalPrice}
-        </Text>
+        <Text style={styles.price}>₹{totalPrice}</Text>
 
         <Text style={styles.advance}>
           Advance: ₹{advance}
@@ -141,7 +138,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center"
@@ -150,9 +147,9 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",
     padding: 20,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 30,
-    elevation: 3
+    elevation: 4
   },
 
   vehicle: {

@@ -1,38 +1,94 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:9090/api" // your backend port
+  baseURL: "http://localhost:9090/api"
 });
 
-export const getDashboard = () => API.get("/admin/dashboard");
+// ✅ FIXED INTERCEPTOR
+API.interceptors.request.use((req) => {
+  const token = localStorage.getItem("adminToken");
 
-// GET all bookings
-export const getBookings = () => API.get("/bookings");
+  if (token) {
+    req.headers.Authorization = `Bearer ${token}`;
+  }
 
-// UPDATE booking status
+  return req; // ✅ VERY IMPORTANT
+});
+
+// ================= GLOBAL ERROR HANDLER =================
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+
+    if (status === 401) {
+      alert("🔐 Session expired. Please login again.");
+      localStorage.removeItem("adminToken");
+      window.location.href = "/login";
+    }
+
+    if (status === 500) {
+      console.error("🚨 Server Error:", error.response?.data);
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+// ================= AUTH =================
+export const adminLogin = (data) =>
+  API.post("/admin/login", data);
+
+// ================= DASHBOARD =================
+export const getDashboardData = () =>
+  API.get("/admin/dashboard");
+
+// ================= BOOKINGS =================
+export const getAllBookings = () =>
+  API.get("/admin/bookings");   // ✅ FIXED
+
 export const updateBookingStatus = (id, status) =>
-  API.put(`/bookings/${id}/status?status=${status}`);
+  API.put(`/admin/bookings/${id}/status`, null, {
+    params: { status }
+  });
 
-// DELETE booking
-export const deleteBooking = (id) =>
-  API.delete(`/bookings/${id}`);
+export const deleteBookingById = (id) =>
+  API.delete(`/admin/bookings/${id}`);
 
-export const getVehicles = () => API.get("/vehicles");
+export const assignDriver = (bookingId, driver) =>
+  API.put(`/admin/bookings/${bookingId}/assign-driver`, driver);
 
-export const addVehicleAPI = (data) => API.post("/vehicles", data);
+// ================= VEHICLES =================
+export const getAllVehicles = () =>
+  API.get("/admin/vehicles");   // ✅ FIXED
 
-export const deleteVehicleAPI = (id) =>
-  API.delete(`/vehicles/${id}`);
+export const createVehicle = (data) =>
+  API.post("/admin/vehicles", data);
 
-export const getDrivers = () => API.get("/drivers");
+export const deleteVehicleById = (id) =>
+  API.delete(`/admin/vehicles/${id}`);
 
-export const addDriverAPI = (data) => API.post("/drivers", data);
+// ================= DRIVERS =================
+export const getAllDrivers = () =>
+  API.get("/admin/drivers");   // ✅ FIXED
 
-export const deleteDriverAPI = (id) =>
-  API.delete(`/drivers/${id}`);
+export const createDriver = (data) =>
+  API.post("/admin/drivers", data);
 
-// ASSIGN DRIVER
-export const assignDriverAPI = (bookingId, driver) =>
-  API.put(`/bookings/${bookingId}/assign-driver`, driver);
+export const deleteDriverById = (id) =>
+  API.delete(`/admin/drivers/${id}`);
+
+// ================= MARKETPLACE =================
+export const getAllMarketplaceVehicles = () =>
+  API.get("/admin/marketplace");   // ✅ FIXED
+
+export const approveVehicle = (id) =>
+  API.put(`/admin/marketplace/${id}/approve`);
+
+export const rejectVehicle = (id) =>
+  API.put(`/admin/marketplace/${id}/reject`);
+
+export const deleteMarketplaceVehicleById = (id) =>
+  API.delete(`/admin/marketplace/${id}`);
 
 export default API;

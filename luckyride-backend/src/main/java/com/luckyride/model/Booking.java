@@ -5,56 +5,62 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "bookings")
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "bookings")
 public class Booking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // User phone number
+    // 🔥 NEW (CRITICAL - JWT BASED USER)
+    @Column(name = "user_id")
+    private Long userId;
+
+    // ⚠️ KEEP (optional - for admin/debug)
+    @JsonProperty("userPhone")
+    @Column(name = "user_phone")
     private String userPhone;
 
-    // Vehicle type
+    private String userEmail;
+
+    // Vehicle
+    private Long vehicleId;
     private String vehicleType;
 
-    // Trip type (LOCAL / OUTSTATION)
+    // Trip
     private String tripType;
-
-    // Pickup date
     private String pickupDate;
+    private Integer days;
 
-    // Number of days
-    private Integer days; // ✅ safe
+    // Locations
+    private String pickupLocation;
+    private String dropLocation;
 
-    // Total booking price
-    private Double totalPrice;   // ✅ FIXED
+    // Distance
+    private Double distance;
 
-    // Advance payment (10%)
-    private Double advancePaid;  // ✅ FIXED
+    // Pricing
+    private Double totalPrice;
+    private Double advancePaid;
 
-    // Booking status
+    // Status
     private String status;
 
-    // Driver details
+    // Driver
     private String driverName;
     private String driverPhone;
 
-    // Pickup location
-    private String pickupLocation;
+    // Payment
+    private Double advanceAmount;
 
-    // Drop location
-    private String dropLocation;
+    @Column(name = "payment_done")
+    private Boolean paymentDone = false;
 
-    // ride distance
-    private Double distance; // ✅ FIXED
-    
-    
-    
-    
-
+    private String paymentMethod;
 }

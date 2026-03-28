@@ -12,9 +12,10 @@ export default function PaymentScreen({ route, navigation }) {
     distance
   } = route.params;
 
-  const base = vehicle?.basePrice || 0;
+  // ✅ SAFE FALLBACKS (VERY IMPORTANT FOR STAGING)
+  const base = vehicle?.pricePerKm || 0;
   const driver = vehicle?.driverCharge || 0;
-  const extraKmRate = vehicle?.extraKmPrice || 0;
+  const extraKmRate = vehicle?.pricePerKm || 0;
 
   const totalDays = parseInt(days) || 1;
 
@@ -31,7 +32,6 @@ export default function PaymentScreen({ route, navigation }) {
   const advance = Math.round(totalPrice * 0.1);
 
   return (
-
     <View style={styles.container}>
 
       {/* HEADER */}
@@ -40,12 +40,14 @@ export default function PaymentScreen({ route, navigation }) {
       {/* 🚗 TRIP CARD */}
       <View style={styles.card}>
 
-        <Text style={styles.vehicle}>{vehicle?.name}</Text>
+        <Text style={styles.vehicle}>
+          {vehicle?.vehicleName || "Vehicle"}
+        </Text>
 
         <Text style={styles.text}>Trip: {tripType}</Text>
         <Text style={styles.text}>Pickup: {pickup}</Text>
 
-        {tripType === "Long trip" && (
+        {tripType === "Long Trip" && (
           <Text style={styles.text}>Drop: {drop}</Text>
         )}
 
@@ -67,18 +69,18 @@ export default function PaymentScreen({ route, navigation }) {
 
         <View style={styles.row}>
           <Text>Base Price</Text>
-          <Text>₹ {base} x {totalDays}</Text>
+          <Text>₹ {base} × {totalDays}</Text>
         </View>
 
         <View style={styles.row}>
           <Text>Driver Charge</Text>
-          <Text>₹ {driver} x {totalDays}</Text>
+          <Text>₹ {driver} × {totalDays}</Text>
         </View>
 
         {distance > 0 && (
           <View style={styles.row}>
             <Text>Extra KM</Text>
-            <Text>₹ {extraKmRate} x {distance.toFixed(0)}</Text>
+            <Text>₹ {extraKmRate} × {distance.toFixed(0)}</Text>
           </View>
         )}
 
@@ -127,7 +129,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: "bold",
-    marginTop: 100,
+    marginTop: 80,
     marginBottom: 20
   },
 
@@ -185,7 +187,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     marginTop: "auto",
-    marginBottom: 50
+    marginBottom: 40
   },
 
   buttonText: {

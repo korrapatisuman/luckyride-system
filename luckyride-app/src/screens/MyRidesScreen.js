@@ -17,20 +17,31 @@ export default function MyRidesScreen() {
 
   // 🔥 FETCH BOOKINGS
   const fetchRides = async () => {
-  try {
-    const res = await API.get(`/bookings/user/${global.user?.phone}`);
-    setRides(res.data);
-  } catch (err) {
-    console.log("Fetch error:", err.message);
-  } finally {
-    setLoading(false);
-    setRefreshing(false);
-  }
-};
+    try {
 
+      if (!global.user?.phone) {
+        console.log("No user phone found");
+        return;
+      }
+
+      const res = await API.get(`/bookings/user?login=${global.user?.phone || global.user?.email}`)
+      setRides(res.data || []);
+
+    } catch (err) {
+      console.log("Fetch error:", err?.response?.data || err.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     fetchRides();
+
+    // 🔄 AUTO REFRESH EVERY 10s (LIKE REAL APPS)
+    const interval = setInterval(fetchRides, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   // 🔄 PULL TO REFRESH
@@ -42,75 +53,86 @@ export default function MyRidesScreen() {
   // 🎨 STATUS COLOR
   const getStatusColor = (status) => {
     switch (status) {
-      case "BOOKED":
-        return "#2196F3";
-      case "CONFIRMED":
-        return "#4CAF50";
-      case "COMPLETED":
-        return "#9E9E9E";
-      default:
-        return "#000";
+      case "BOOKED": return "#2196F3";
+      case "CONFIRMED": return "#4CAF50";
+      case "STARTED": return "#ff9800";
+      case "COMPLETED": return "#9E9E9E";
+      case "CANCELLED": return "#f44336";
+      default: return "#000";
     }
   };
 
+  // 🚗 ICON
   const getVehicleIcon = (type) => {
-  switch (type) {
-    case "Car 4+1":
-      return "🚘";
-      case "Car 9+1":
-      return "🚙";
-    case "Traveller 24 Seater":
-      return "🚌";
-      case "Traveller 12 Seater":
-        return "🚐";
-    case "Auto":
-      return "🛺";
-    default:
-      return "🚘";
-  }
-};
+    switch (type) {
+      case "Auto": return "🛺";
+      case "Car": return "🚗";
+      case "Traveller": return "🚐";
+      default: return "🚘";
+    }
+  };
 
-  // 🚗 RIDE CARD
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
+  // 🚗 CARD
+  const renderItem = ({ item }) => {
 
-      <View style={styles.row}>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-  
-  <Text style={{ fontSize: 20, marginRight: 6 }}>
-    {getVehicleIcon(item.vehicleType)}
-  </Text>
+    const isDriverAssigned = item.driverName;
 
-  <Text style={styles.vehicle}>
-    {item.vehicleType}
-  </Text>
+    return (
+      <View style={styles.card}>
 
-   </View>
-        <Text style={[styles.status, { color: getStatusColor(item.status) }]}>
-          {item.status}
+        {/* HEADER */}
+        <View style={styles.row}>
+          <View style={styles.vehicleRow}>
+            <Text style={styles.icon}>
+              {getVehicleIcon(item.vehicleType)}
+            </Text>
+            <Text style={styles.vehicle}>
+              {item.vehicleType}
+            </Text>
+          </View>
+
+          <Text style={[styles.status, { color: getStatusColor(item.status) }]}>
+            {item.status}
+          </Text>
+        </View>
+
+        {/* DETAILS */}
+        <Text style={styles.text}>📍 {item.pickupLocation}</Text>
+
+        {item.dropLocation && (
+          <Text style={styles.text}>➡ {item.dropLocation}</Text>
+        )}
+
+        <Text style={styles.text}>📅 {item.pickupDate}</Text>
+        <Text style={styles.text}>🕒 {item.days} day(s)</Text>
+
+        {item.distance > 0 && (
+          <Text style={styles.text}>
+            📏 {item.distance.toFixed(1)} km
+          </Text>
+        )}
+
+        {/* DRIVER */}
+        <View style={styles.driverBox}>
+          <Text style={styles.driverTitle}>Driver</Text>
+          <Text style={styles.text}>
+            {item.driverName || "Assigning..."}
+          </Text>
+          <Text style={styles.text}>
+            {item.driverPhone || ""}
+          </Text>
+        </View>
+
+        {/* PRICE */}
+        <Text style={styles.price}>₹ {item.totalPrice}</Text>
+
+        <Text style={styles.advance}>
+          Advance Paid: ₹ {item.advancePaid}
         </Text>
+
       </View>
-
-      <Text style={styles.text}>Trip: {item.tripType}</Text>
-      <Text style={styles.text}>Date: {item.pickupDate}</Text>
-      <Text style={styles.text}>Days: {item.days}</Text>
-
-      {item.distance > 0 && (
-        <Text style={styles.text}>
-          Distance: {item.distance.toFixed(1)} km
-        </Text>
-      )}
-
-      <Text style={styles.price}>
-        ₹ {item.totalPrice}
-      </Text>
-
-      <Text style={styles.advance}>
-        Advance Paid: ₹ {item.advancePaid}
-      </Text>
-
-    </View>
-  );
+    );
+  };
 
   // ⏳ LOADING
   if (loading) {
@@ -144,10 +166,10 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 12,
+    padding: 16,
+    borderRadius: 14,
     marginBottom: 15,
-    elevation: 3
+    elevation: 4
   },
 
   row: {
@@ -156,18 +178,41 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
 
+  vehicleRow: {
+    flexDirection: "row",
+    alignItems: "center"
+  },
+
+  icon: {
+    fontSize: 20,
+    marginRight: 6
+  },
+
   vehicle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold"
   },
 
   status: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "bold"
   },
 
   text: {
     fontSize: 14,
+    marginBottom: 4,
+    color: "#444"
+  },
+
+  driverBox: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 10
+  },
+
+  driverTitle: {
+    fontWeight: "bold",
     marginBottom: 4
   },
 
@@ -179,8 +224,8 @@ const styles = StyleSheet.create({
   },
 
   advance: {
-    fontSize: 14,
-    color: "#555"
+    fontSize: 13,
+    color: "#666"
   },
 
   center: {

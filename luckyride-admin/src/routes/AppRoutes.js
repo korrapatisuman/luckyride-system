@@ -1,24 +1,38 @@
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 import LoginPage from "../pages/LoginPage";
 import DashboardPage from "../pages/DashboardPage";
-import UsersPage from "../pages/UsersPage";
-import VehiclesPage from "../pages/VehiclesPage";
-import DriversPage from "../pages/DriversPage";
 import BookingsPage from "../pages/BookingsPage";
+import DriversPage from "../pages/DriversPage";
+import VehiclesPage from "../pages/VehiclesPage";
+import AdminMarketplace from "../pages/AdminMarketplace";
 
-function AppRoutes() {
+import AdminLayout from "../components/AdminLayout";
+import ProtectedRoute from "../components/ProtectedRoute";
+
+export default function AppRoutes() {
   return (
     <Routes>
+
+      {/* 🔓 Public */}
       <Route path="/" element={<LoginPage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/users" element={<UsersPage />} />
-      <Route path="/vehicles" element={<VehiclesPage />} />
-      <Route path="/drivers" element={<DriversPage />} />
-      <Route path="/bookings" element={<BookingsPage />} />
+
+      {/* 🔐 Protected */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="bookings" element={<BookingsPage />} />
+        <Route path="drivers" element={<DriversPage />} />
+        <Route path="vehicles" element={<VehiclesPage />} />
+        <Route path="marketplace" element={<AdminMarketplace />} />
+      </Route>
+
     </Routes>
   );
 }
-
-export default AppRoutes;

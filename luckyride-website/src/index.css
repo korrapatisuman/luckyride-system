@@ -7,7 +7,52 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 🔥 Smooth Scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 🔥 Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0f172a;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #16a34a;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+.date-input {
+  width: 300px;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.react-datepicker {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.react-datepicker__header {
+  background-color: #16a34a;
+  color: white;
+}
+
+.react-datepicker__day--selected {
+  background-color: #16a34a;
 }

@@ -1,7 +1,10 @@
 package com.luckyride.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import lombok.*;
+import java.util.List;
+
 
 @Entity
 @Table(name = "vehicles")
@@ -15,9 +18,23 @@ public class Vehicle {
     private Long id;
 
     private String vehicleName;
-    private String vehicleType;
     private int seatingCapacity;
-    private double pricePerKm;
+
+    private Double pricePerKm;   // ✅ changed
+
+    // ✅ FIXED (important)
+    private Double basePrice;
+    private Double driverCharge;
+    private Double extraKmPrice;
+
     private String imageUrl;
 
+    @Enumerated(EnumType.STRING)
+    private VehicleType vehicleType;
+
+    public enum VehicleType {
+        AUTO,
+        CAR,
+        TRAVELLER
+    }
 }

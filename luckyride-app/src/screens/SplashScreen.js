@@ -1,39 +1,55 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import API from "../services/api";
 
 export default function SplashScreen({ navigation }) {
 
   useEffect(() => {
 
-    const timer = setTimeout(() => {
-      navigation.replace("Login");
-    }, 2000);
+    const checkAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
 
-    return () => clearTimeout(timer);
+        console.log("🔐 STORED TOKEN:", token);
+
+        if (token) {
+          // ✅ Restore token globally
+          global.userToken = token;
+
+          // ✅ Attach to API
+          API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+          navigation.replace("Main");
+        } else {
+          navigation.replace("Login");
+        }
+
+      } catch (err) {
+        console.log("SPLASH ERROR:", err);
+        navigation.replace("Login");
+      }
+    };
+
+    setTimeout(checkAuth, 1500);
 
   }, []);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>LuckyRide 🚖</Text>
-      <Text>Smart Vehicle Rental</Text>
+      <Text style={styles.logo}>🚕 LuckyRide</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#ffffff"
+    alignItems: "center"
   },
-
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    marginBottom: 10
+  logo: {
+    fontSize: 28,
+    fontWeight: "bold"
   }
-
 });

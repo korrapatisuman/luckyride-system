@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
@@ -9,25 +8,37 @@ import {
 } from "react-native";
 import API from "../services/api";
 
-export default function VehicleScreen({ navigation }) {
+export default function VehicleScreen({ navigation, route }) {
 
   const [vehicles, setVehicles] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // 🔥 FETCH VEHICLES FROM BACKEND
-  const fetchVehicles = async () => {
-    try {
-      const res = await API.get("/vehicles");
-      console.log("VEHICLES:", res.data);
+    const fetchVehicles = async () => {
+  try {
+    const res = await API.get("/vehicles");
 
+    console.log("VEHICLES RAW:", res.data);
+
+    // ✅ handle both formats
+    if (res.data?.success) {
+      setVehicles(res.data.data || []);
+    } else if (Array.isArray(res.data)) {
+      // fallback (if backend returns plain list)
       setVehicles(res.data);
-    } catch (err) {
-      console.log("Vehicle fetch error:", err.message);
-    } finally {
-      setLoading(false);
+    } else {
+      alert(res.data.message || "Failed to fetch vehicles");
+      setVehicles([]);
     }
-  };
+
+  } catch (err) {
+    console.log("Vehicle fetch error:", err?.response?.data || err.message);
+    alert(err?.response?.data?.message || "Server error");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchVehicles();
@@ -39,9 +50,10 @@ export default function VehicleScreen({ navigation }) {
       return;
     }
 
-    navigation.navigate("TripType", {
-      vehicle: selected
-    });
+      navigation.navigate("TripType", {
+        vehicle: selected,
+          pickup: route?.params?.pickup // optional safe
+     });
   };
 
   const getIcon = (type) => {
@@ -87,14 +99,13 @@ export default function VehicleScreen({ navigation }) {
   };
 
   // ⏳ LOADING
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
-        <Text>Loading vehicles...</Text>
-      </View>
-    );
-  }
+   if (!loading && vehicles.length === 0) {
+  return (
+    <View style={styles.center}>
+      <Text>No vehicles available</Text>
+    </View>
+  );
+}
 
   return (
     <View style={styles.container}>

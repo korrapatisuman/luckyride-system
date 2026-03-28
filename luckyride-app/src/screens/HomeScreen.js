@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -8,6 +9,8 @@ import {
 } from "react-native";
 
 export default function HomeScreen({ navigation }) {
+
+  const [pickup, setPickup] = useState("");
 
   return (
    <ScrollView
@@ -24,14 +27,16 @@ export default function HomeScreen({ navigation }) {
 <View style={styles.searchBox}>
 
   {/* Input field */}
-  <TextInput
-    placeholder="Enter pickup location..."
-    placeholderTextColor="#777"
-    style={{ flex: 1, color: "#000" }}
-  />
+ <TextInput
+  placeholder="Enter pickup location..."
+  placeholderTextColor="#777"
+  style={{ flex: 1, color: "#000" }}
+  value={pickup}
+  onChangeText={setPickup}
+/>
 
   {/* Right side icon */}
-  <TouchableOpacity onPress={() => navigation.navigate("Vehicles")}>
+  <TouchableOpacity onPress={() => navigation.navigate("Vehicles", { pickup })}>
     <Text style={{ fontSize: 20 }}>🚘</Text>
   </TouchableOpacity>
 
@@ -80,22 +85,6 @@ export default function HomeScreen({ navigation }) {
           Traveller
         </Text>
         </View>
-      </View>
-
-      {/* 🔥 OFFER CARD */}
-      <View style={styles.offerCard}>
-        <Text style={styles.offerTitle}> 😎 Special Offer</Text>
-        <Text style={styles.offerText}>
-          🔥 Get 10% OFF on your first ride 🔥
-        </Text>
-      </View>
-
-      {/* 🕒 RECENT RIDES */}
-      <Text style={styles.sectionTitle}>Recent Activity</Text>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Kadapa → Bangalore</Text>
-        <Text style={styles.cardSub}>₹3500 • Completed</Text>
       </View>
 
       {/* 📞 SUPPORT */}

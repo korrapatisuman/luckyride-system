@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import {
-  getVehicles,
-  addVehicleAPI,
-  deleteVehicleAPI
+  getAllVehicles,
+  createVehicle,
+  deleteVehicleById
 } from "../services/api";
 
 function VehiclesPage() {
@@ -12,6 +12,7 @@ function VehiclesPage() {
   const [type, setType] = useState("");
   const [seats, setSeats] = useState("");
   const [openMenu, setOpenMenu] = useState(null);
+  const [price, setPrice] = useState("");
 
   useEffect(() => {
     fetchVehicles();
@@ -20,8 +21,8 @@ function VehiclesPage() {
   // 🔥 FETCH VEHICLES
   const fetchVehicles = async () => {
     try {
-      const res = await getVehicles();
-      console.log("ADMIN VEHICLES:", res.data);
+      const res = await getAllVehicles();
+      console.log("Vehicles:", vehicles);
       setVehicles(res.data || []);
     } catch (err) {
       console.error("Fetch error:", err);
@@ -36,11 +37,11 @@ function VehiclesPage() {
     }
 
     try {
-      await addVehicleAPI({
+      await createVehicle({
         vehicleName: name,
         vehicleType: type,
         seatingCapacity: Number(seats),
-        pricePerKm: 20, // default price (you can improve later)
+        pricePerKm: Number(price), 
         imageUrl: null
       });
 
@@ -50,6 +51,7 @@ function VehiclesPage() {
       setName("");
       setType("");
       setSeats("");
+      setPrice("");
 
     } catch (err) {
       console.error("Add error:", err);
@@ -59,7 +61,7 @@ function VehiclesPage() {
   // ❌ DELETE VEHICLE
   const deleteVehicle = async (id) => {
     try {
-      await deleteVehicleAPI(id);
+      await deleteVehicleById(id);
       fetchVehicles();
     } catch (err) {
       console.error("Delete error:", err);
@@ -90,14 +92,24 @@ function VehiclesPage() {
             <option value="">Select Type</option>
             <option value="Auto">Auto</option>
             <option value="Car">Car</option>
-            <option value="Traveller">Traveller</option>
+            <option value="Traveller">Traveller 12+1</option>
+            <option value="MiniBus">MiniBus 24</option>
+            <option value="Bus">Bus 41+1</option>
           </select>
 
           <input
+           type="number"
             style={styles.input}
             placeholder="Seats"
-            value={seats}
+           value={seats}
             onChange={(e) => setSeats(e.target.value)}
+           />
+
+          <input
+            style={styles.input}
+            placeholder="Price per KM"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
           />
 
           <button style={styles.addBtn} onClick={addVehicle}>
@@ -108,7 +120,7 @@ function VehiclesPage() {
       </div>
 
       {/* TABLE */}
-      <div style={styles.card}>
+      <div style={styles.driver}>
 
         <table style={styles.table}>
 
@@ -201,9 +213,9 @@ function VehiclesPage() {
 const styles = {
 
   container: {
+    position: "sticky", 
     padding: "30px",
-    background: "#f1f5f9",
-    minHeight: "100vh"
+    background: "#f1f5f9"
   },
 
   heading: {
@@ -213,17 +225,27 @@ const styles = {
   },
 
   card: {
+    background: "#0f172a",
+    padding: "20px",
+    borderRadius: "10px",
+    marginBottom: "20px",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.05)"
+  },
+    driver: {
     background: "#fff",
     padding: "20px",
     borderRadius: "10px",
     marginBottom: "20px",
+    height: "400px",  
+    overflowY: "auto",   
     boxShadow: "0 4px 10px rgba(0,0,0,0.05)"
   },
 
   form: {
     display: "flex",
     gap: "10px",
-    flexWrap: "wrap"
+    flexWrap: "wrap",
+    justifyContent: "space-between"
   },
 
   input: {
@@ -247,8 +269,12 @@ const styles = {
   },
 
   thead: {
-    background: "#f8fafc"
-  },
+  position: "sticky",
+  top: 0,
+  background: "#0f172a",
+  color: "#fff",
+  zIndex: 1
+},
 
   headerCell: {
     padding: "10px",

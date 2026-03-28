@@ -1,44 +1,90 @@
 import React from "react";
+import BookingForm from "./BookingForm";
 
 function HeroSection() {
   return (
-    <div style={hero}>
-      <h1 style={title}>Welcome to LuckyRide</h1>
+    <div style={styles.hero}>
 
-      <p style={subtitle}>
-        Book Autos, Cars and Travellers Anytime Anywhere
-      </p>
+      {/* Overlay */}
+      <div style={styles.overlay}></div>
 
-      <button style={button}>Book Ride</button>
+      {/* Content */}
+      <div style={styles.content}>
+
+        {/* Left Side */}
+        <div style={styles.left}>
+          <h1 style={styles.title}>
+              Smart Vehicle Rentals, Anytime 🚖
+          </h1>
+
+           <p style={styles.subtitle}>
+           Reliable autos, cars & travellers for local and outstation trips.
+           Book instantly with transparent pricing.
+          </p>
+        </div>
+
+        {/* Right Side - Booking Form */}
+        <div style={styles.right}>
+          <BookingForm />
+        </div>
+
+      </div>
     </div>
   );
 }
 
-const hero = {
-  background: "#f1f5f9",
-  textAlign: "center",
-  padding: "100px 20px"
-};
+const styles = {
+  hero: {
+    height: "90vh",
+    backgroundImage:
+      "url('https://images.unsplash.com/photo-1502877338535-766e1452684a')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    position: "relative"
+  },
 
-const title = {
-  fontSize: "48px",
-  marginBottom: "20px"
-};
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background: "rgba(0,0,0,0.55)"
 
-const subtitle = {
-  fontSize: "20px",
-  marginBottom: "30px",
-  color: "#555"
-};
+  },
 
-const button = {
-  padding: "12px 25px",
-  fontSize: "16px",
-  background: "#2563eb",
-  color: "white",
-  border: "none",
-  borderRadius: "5px",
-  cursor: "pointer"
+  content: {
+    position: "relative",
+    zIndex: 2,
+    display: "flex",
+    height: "calc(100vh - 70px)",
+    justifyContent: "space-between",
+    alignItems: "center",
+    height: "100%",
+    padding: "0 60px",
+    color: "white",
+    marginTop: "70px"
+  },
+
+  left: {
+    width: "50%"
+  },
+
+  title: {
+    fontSize: "48px",
+    marginBottom: "10px",
+    color:"yellow"
+  },
+
+  subtitle: {
+    fontSize: "18px",
+    color:"white",
+    opacity: 0.9
+  },
+
+  right: {
+    width: "35%"
+  }
 };
 
 export default HeroSection;

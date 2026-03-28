@@ -2,53 +2,89 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function BookingSuccessScreen({ route, navigation }) {
 
-  const { booking } = route.params || {};
+  const booking = route?.params?.booking;
+
+  // ❗ SAFETY (NO CRASH)
+  if (!booking) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.error}>No booking data found</Text>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.replace("Main")}
+        >
+          <Text style={styles.buttonText}>Go Home</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const isDriverAssigned = booking?.driverName;
 
   return (
 
     <View style={styles.container}>
 
-      <Text style={styles.success}>Booking Confirmed ✅</Text>
+      {/* ✅ SUCCESS ICON */}
+      <Text style={styles.successIcon}>🎉</Text>
 
+      <Text style={styles.success}>
+        Booking Confirmed
+      </Text>
+
+      {/* 🧾 BOOKING CARD */}
       <View style={styles.card}>
 
-        <Text style={styles.info}>
+        <Text style={styles.bookingId}>
           Booking ID: LR{booking?.id}
         </Text>
 
         <Text style={styles.info}>
-          Vehicle: {booking?.vehicleType}
+          🚗 {booking?.vehicleType}
         </Text>
 
         <Text style={styles.info}>
-          Pickup: {booking?.pickupLocation}
+          📍 {booking?.pickupLocation}
         </Text>
 
         {booking?.dropLocation && (
           <Text style={styles.info}>
-            Drop: {booking?.dropLocation}
+            ➡ {booking?.dropLocation}
           </Text>
         )}
 
-        <Text style={styles.info}>
+        <Text style={styles.status}>
           Status: {booking?.status}
-        </Text>
-
-        {/* 🚗 DRIVER DETAILS (NEW) */}
-        <Text style={styles.info}>
-          Driver: {booking?.driverName || "Assigning..."}
-        </Text>
-
-        <Text style={styles.info}>
-          Phone: {booking?.driverPhone || "-"}
         </Text>
 
       </View>
 
+      {/* 🚗 DRIVER CARD */}
+      <View style={styles.driverCard}>
+
+        <Text style={styles.driverTitle}>
+          Driver Details
+        </Text>
+
+        <Text style={styles.info}>
+          👤 {booking?.driverName || "Assigning..."}
+        </Text>
+
+        <Text style={styles.info}>
+          📞 {booking?.driverPhone || "Will be shared soon"}
+        </Text>
+
+      </View>
+
+      {/* 📢 MESSAGE */}
       <Text style={styles.sub}>
-        Driver will be assigned shortly 🚗
+        {isDriverAssigned
+          ? "Driver assigned successfully 🚗"
+          : "Driver will be assigned shortly 🚗"}
       </Text>
 
+      {/* 🔥 ACTION BUTTON */}
       <TouchableOpacity
         style={styles.button}
         onPress={() =>
@@ -76,45 +112,83 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5"
   },
 
+  successIcon: {
+    fontSize: 50,
+    marginBottom: 10
+  },
+
   success: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
-    color: "green"
+    color: "#2e7d32"
+  },
+
+  bookingId: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 10
   },
 
   card: {
     backgroundColor: "#fff",
     padding: 20,
-    borderRadius: 12,
+    borderRadius: 14,
     width: "100%",
-    marginBottom: 20,
+    marginBottom: 15,
+    elevation: 4
+  },
+
+  driverCard: {
+    backgroundColor: "#ffffff",
+    padding: 15,
+    borderRadius: 14,
+    width: "100%",
+    marginBottom: 15,
     elevation: 3
   },
 
-  info: {
+  driverTitle: {
     fontSize: 16,
+    fontWeight: "bold",
     marginBottom: 8
+  },
+
+  info: {
+    fontSize: 15,
+    marginBottom: 6,
+    color: "#444"
+  },
+
+  status: {
+    marginTop: 10,
+    fontWeight: "bold",
+    color: "#1976d2"
   },
 
   sub: {
     fontSize: 14,
-    color: "#555",
-    marginBottom: 20
+    color: "#666",
+    marginBottom: 20,
+    textAlign: "center"
   },
 
   button: {
-    marginTop: 10,
     backgroundColor: "#000",
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 10
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 12
   },
 
   buttonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold"
+  },
+
+  error: {
+    fontSize: 18,
+    marginBottom: 20
   }
 
 });

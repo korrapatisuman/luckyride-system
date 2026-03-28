@@ -1,40 +1,44 @@
 import React from "react";
 
-function VehicleCard({ title, seats }) {
+function VehicleCard({ type, selected, onSelect }) {
+
+  const getIcon = () => {
+    switch (type) {
+      case "Auto":
+        return "🛺";
+      case "Car 4+1":
+        return "🚗";
+      case "Traveller 12 Seater":
+        return "🚐";
+      default:
+        return "🚗";
+    }
+  };
+
+  const handleClick = () => {
+    if (typeof onSelect === "function") {
+      onSelect(type);
+    } else {
+      console.error("❌ onSelect is not a function:", onSelect);
+    }
+  };
+
   return (
-    <div style={styles.card}>
-
-      <h2>{title}</h2>
-
-      <p>{seats}</p>
-
-      <button style={styles.button}>Book Now</button>
-
+    <div
+      onClick={handleClick}
+      style={{
+        border: selected === type ? "2px solid green" : "1px solid #ddd",
+        padding: 15,
+        cursor: "pointer",
+        textAlign: "center",
+        borderRadius: 10,
+        width: "100%"
+      }}
+    >
+      <h2>{getIcon()}</h2>
+      <p>{type}</p>
     </div>
   );
 }
-
-const styles = {
-
-  card: {
-    width: "250px",
-    background: "white",
-    padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-    textAlign: "center"
-  },
-
-  button: {
-    marginTop: "10px",
-    padding: "10px 20px",
-    border: "none",
-    background: "#2563eb",
-    color: "white",
-    borderRadius: "6px",
-    cursor: "pointer"
-  }
-
-};
 
 export default VehicleCard;

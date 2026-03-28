@@ -14,9 +14,9 @@ import { cities } from "../utils/cities";
 
 export default function BookingDetailsScreen({ route, navigation }) {
 
-  const { tripType, vehicle } = route.params;
+  const { tripType, vehicle, pickup: initialPickup } = route.params;
 
-  const [pickup, setPickup] = useState("");
+  const [pickup, setPickup] = useState(initialPickup || "");
   const [drop, setDrop] = useState("");
   const [pickupCoords, setPickupCoords] = useState(null);
   const [dropCoords, setDropCoords] = useState(null);
@@ -36,7 +36,7 @@ export default function BookingDetailsScreen({ route, navigation }) {
       city.name.toLowerCase().includes(text.toLowerCase())
     );
 
-    setFilteredPickup(results.slice(0, 5)); // limit results
+    setFilteredPickup(results.slice(0, 5));
   };
 
   const handleDropChange = (text) => {
@@ -65,6 +65,12 @@ export default function BookingDetailsScreen({ route, navigation }) {
   // 📏 DISTANCE
   const calculateDistance = async () => {
 
+    useEffect(() => {
+      if (tripType === "Outstation" && pickupCoords && dropCoords) {
+    calculateDistance();
+    }
+   }, [pickupCoords, dropCoords]);
+
     if (!pickupCoords || !dropCoords) {
       alert("Select locations properly");
       return;
@@ -77,9 +83,9 @@ export default function BookingDetailsScreen({ route, navigation }) {
       setDistance(km);
     } catch (err) {
       alert("Distance calculation failed");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -107,26 +113,26 @@ export default function BookingDetailsScreen({ route, navigation }) {
         </View>
       )}
 
-      {/* DROP */}
-      {tripType === "Long Trip" && (
-        <>
-          <TextInput
+      // DROP (ONLY FOR OUTSTATION)
+       {tripType === "Outstation" && (
+       <>
+            <TextInput
             style={styles.input}
-            placeholder="Drop Location"
+           placeholder="Drop Location"
             value={drop}
-            onChangeText={handleDropChange}
-          />
+           onChangeText={handleDropChange}
+         />
 
-          {filteredDrop.length > 0 && (
-            <View style={styles.suggestionBox}>
-              {filteredDrop.map((item, index) => (
-                <TouchableOpacity key={index} onPress={() => selectDrop(item)}>
-                  <Text style={styles.suggestion}>{item.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </>
+       {filteredDrop.length > 0 && (
+         <View style={styles.suggestionBox}>
+           {filteredDrop.map((item, index) => (
+            <TouchableOpacity key={index} onPress={() => selectDrop(item)}>
+              <Text style={styles.suggestion}>{item.name}</Text>
+            </TouchableOpacity>
+             ))}
+           </View>
+         )}
+       </>
       )}
 
       {/* DISTANCE BUTTON */}
@@ -174,7 +180,9 @@ export default function BookingDetailsScreen({ route, navigation }) {
         keyboardType="numeric"
         value={days}
         onChangeText={(text) => {
-          if (/^\d*$/.test(text)) setDays(text);
+          if (/^\d*$/.test(text)) {
+            setDays(text === "" ? "" : Math.max(1, parseInt(text)).toString());
+          }
         }}
       />
 
@@ -188,20 +196,28 @@ export default function BookingDetailsScreen({ route, navigation }) {
             return;
           }
 
-          if (tripType === "Long Trip" && distance === 0) {
-            alert("Calculate distance first");
-            return;
+          if (tripType === "Long Trip") {
+            if (!drop) {
+              alert("Enter drop location");
+              return;
+            }
+
+            if (distance === 0) {
+              alert("Calculate distance first");
+              return;
+            }
           }
 
           navigation.navigate("Payment", {
             tripType,
             vehicle,
             pickup,
-            drop,
+            drop: tripType === "Local Trip" ? pickup : drop,
             pickupDate,
             days,
             distance
           });
+
         }}
       >
         <Text style={styles.buttonText}>Continue to Payment</Text>

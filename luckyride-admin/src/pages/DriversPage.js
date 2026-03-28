@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import {
-  getDrivers,
-  addDriverAPI,
-  deleteDriverAPI
+  getAllDrivers,
+  createDriver,
+  deleteDriverById
 } from "../services/api";
 
 function DriversPage() {
@@ -17,13 +17,16 @@ function DriversPage() {
   }, []);
 
   const fetchDrivers = async () => {
-    try {
-      const res = await getDrivers();
-      setDrivers(res.data || []);
-    } catch (err) {
-      console.error("Fetch error:", err);
-    }
-  };
+  try {
+    const res = await getAllDrivers();
+
+    console.log("DRIVERS API RESPONSE 👉", res.data); // 👈 ADD THIS
+
+    setDrivers(res.data);
+  } catch (err) {
+    console.error("Fetch error:", err);
+  }
+};
 
   // ➕ ADD DRIVER
   const addDriver = async () => {
@@ -38,7 +41,7 @@ function DriversPage() {
     }
 
     try {
-      await addDriverAPI({ name, phone });
+      await createDriver({ name, phone });
       fetchDrivers();
       setName("");
       setPhone("");
@@ -50,7 +53,7 @@ function DriversPage() {
   // ❌ DELETE DRIVER
   const deleteDriver = async (id) => {
     try {
-      await deleteDriverAPI(id);
+      await deleteDriverById(id);
       fetchDrivers();
     } catch (err) {
       console.error("Delete error:", err);
@@ -225,8 +228,12 @@ const styles = {
   },
 
   thead: {
-    background: "#f8fafc"
-  },
+  position: "sticky",
+  top: 0,
+  background: "#0f172a",
+  color: "#fff",
+  zIndex: 1
+},
 
   headerCell: {
     padding: "10px",

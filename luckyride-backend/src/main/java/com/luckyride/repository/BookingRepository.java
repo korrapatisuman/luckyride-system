@@ -7,11 +7,10 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    List<Booking> findByUserPhone(String userPhone);
+    // ✅ NEW (MAIN METHOD - JWT BASED)
+    List<Booking> findByUserId(Long userId);
 
-    List<Booking> findByUserPhoneAndStatusIn(
-            String userPhone,
-            List<String> status
-    );
-
+    // ⚠️ KEEP (for backward/admin usage)
+    List<Booking> findByUserPhone(String phone);
+    List<Booking> findByUserEmail(String email);
 }

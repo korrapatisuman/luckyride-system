@@ -1,8 +1,10 @@
 package com.luckyride.model;
 
+import lombok.Data;
 import jakarta.persistence.*;
 
 @Entity
+@Data
 @Table(name="admins")
 public class Admin {
 
@@ -11,28 +13,5 @@ public class Admin {
     private Long id;
 
     private String email;
-
     private String password;
-
-    public Admin() {}
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

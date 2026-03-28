@@ -11,12 +11,32 @@ export default function TabNavigator() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        lazy: true // ✅ THIS IS KEY
+        lazy: true,
+        tabBarActiveTintColor: "#2563eb",
+        tabBarInactiveTintColor: "#6b7280",
+        tabBarStyle: {
+          height: 60,
+          paddingBottom: 5
+        }
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="MyRides" component={MyRidesScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen 
+        name="Home" 
+        component={HomeScreen} 
+        options={{ tabBarLabel: "Home" }}
+      />
+
+      <Tab.Screen 
+        name="MyRides" 
+        component={MyRidesScreen} 
+        options={{ tabBarLabel: "My Rides" }}
+      />
+
+      <Tab.Screen 
+        name="Profile" 
+        component={ProfileScreen} 
+        options={{ tabBarLabel: "Profile" }}
+      />
     </Tab.Navigator>
   );
 }

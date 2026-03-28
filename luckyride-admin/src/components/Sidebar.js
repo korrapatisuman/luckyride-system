@@ -1,70 +1,105 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
 function Sidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken");
+    navigate("/");
+  };
+
+    const menu = [
+    { name: "Dashboard", path: "/dashboard", icon: "📊" },
+    { name: "Drivers", path: "/drivers", icon: "🧑‍✈️" },
+    { name: "Vehicles", path: "/vehicles", icon: "🚗" },
+    { name: "Bookings", path: "/bookings", icon: "📦" },
+    { name: "Marketplace", path: "/marketplace", icon: "🛒" }
+  ];
+
   return (
     <div style={styles.sidebar}>
+  <div>
+    <h2 style={styles.logo}>🚗 LuckyRide</h2>
 
-      <h2 style={styles.logo}>LuckyRide</h2>
-
-      <ul style={styles.menu}>
-
-        <li>
-          <Link style={styles.link} to="/">Dashboard</Link>
-        </li>
-
-        <li>
-          <Link style={styles.link} to="/users">Users</Link>
-        </li>
-
-        <li>
-          <Link style={styles.link} to="/drivers">Drivers</Link>
-        </li>
-
-        <li>
-          <Link style={styles.link} to="/vehicles">Vehicles</Link>
-        </li>
-
-        <li>
-          <Link style={styles.link} to="/bookings">Bookings</Link>
-        </li>
-
-        <li>
-          <Link style={styles.link} to="/login">Logout</Link>
-        </li>
-
-      </ul>
-
+    <div style={styles.menu}>
+      {menu.map((item) => (
+        <NavLink
+          key={item.path}
+          to={item.path}
+          style={({ isActive }) => ({
+            ...styles.link,
+            background: isActive ? "#2563eb" : "transparent"
+          })}
+        >
+          <span>{item.icon}</span>
+          {item.name}
+        </NavLink>
+      ))}
     </div>
+  </div>
+
+  {/* ✅ ALWAYS VISIBLE */}
+  <button style={styles.logoutBtn} onClick={handleLogout}>
+    🚪 Logout
+  </button>
+</div>
   );
 }
 
 const styles = {
-
-  sidebar: {
-    width: "220px",
-    height: "100vh",
-    background: "#1e293b",
-    color: "white",
-    padding: "20px"
-  },
+    sidebar: {
+  width: "220px",
+  background: "#0f172a",
+  color: "#fff",
+  padding: "20px",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  overflow: "hidden"
+},
 
   logo: {
+    fontSize: "22px",
+    fontWeight: "bold",
     marginBottom: "30px"
   },
 
   menu: {
     listStyle: "none",
-    padding: 0
+    padding: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px"
   },
 
-  link: {
-    color: "white",
+    link: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    padding: "10px",
+    borderRadius: "8px",
     textDecoration: "none",
-    display: "block",
-    padding: "10px 0"
-  }
+    color: "#fff",
+    transition: "0.2s"
+  },
 
+  icon: {
+    fontSize: "16px"
+  },
+
+  logoutBtn: {
+    width: "100%",
+    padding: "10px",
+    marginTop: "20px",
+    border: "none",
+    background: "#ef4444",
+    color: "#fff",
+    borderRadius: "6px",
+    cursor: "pointer",
+    textAlign: "left"
+  }
 };
 
 export default Sidebar;

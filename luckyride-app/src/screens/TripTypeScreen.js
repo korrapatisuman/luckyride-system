@@ -1,13 +1,14 @@
-import { Button, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function TripTypeScreen({ route, navigation }) {
 
-  const { vehicle } = route.params;
+  const { vehicle, pickup } = route.params;
 
   const selectTrip = (type) => {
     navigation.navigate("BookingDetails", {
-      vehicle: vehicle,
-      tripType: type
+      vehicle,
+      tripType: type,
+      pickup
     });
   };
 
@@ -16,19 +17,23 @@ export default function TripTypeScreen({ route, navigation }) {
 
       <Text style={styles.title}>Select Trip Type</Text>
 
-      <View style={styles.button}>
-        <Button
-          title="Local Trip"
-          onPress={() => selectTrip("Local Trip")}
-        />
-      </View>
+      {/* LOCAL */}
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => selectTrip("Local")}
+      >
+        <Text style={styles.text}>🚕 Local Trip</Text>
+        <Text style={styles.sub}>8 hrs / 80 km included</Text>
+      </TouchableOpacity>
 
-      <View style={styles.button}>
-        <Button
-          title="Long Trip"
-          onPress={() => selectTrip("Long Trip")}
-        />
-      </View>
+      {/* OUTSTATION */}
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => selectTrip("Outstation")}
+      >
+        <Text style={styles.text}>🚗 Outstation Trip</Text>
+        <Text style={styles.sub}>Min 300 km/day</Text>
+      </TouchableOpacity>
 
     </View>
   );
@@ -47,5 +52,10 @@ const styles = StyleSheet.create({
   },
   button: {
     marginVertical: 10
-  }
+  },
+  sub: {
+  fontSize: 12,
+  color: "#777",
+  marginTop: 5
+}
 });
