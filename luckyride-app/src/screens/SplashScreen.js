@@ -1,35 +1,40 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import API from "../services/api";
 
 export default function SplashScreen({ navigation }) {
 
   useEffect(() => {
 
     const checkAuth = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
 
-        console.log("🔐 STORED TOKEN:", token);
+  try {
 
-        if (token) {
-          // ✅ Restore token globally
-          global.userToken = token;
+    const token = await AsyncStorage.getItem("token");
+    const userData = await AsyncStorage.getItem("user");
 
-          // ✅ Attach to API
-          API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    console.log("🔐 TOKEN:", token);
+    console.log("👤 USER:", userData);
 
-          navigation.replace("Main");
-        } else {
-          navigation.replace("Login");
-        }
+    if (token && userData) {
 
-      } catch (err) {
-        console.log("SPLASH ERROR:", err);
-        navigation.replace("Login");
-      }
-    };
+      global.user = JSON.parse(userData);
+
+      navigation.replace("Main");
+
+    } else {
+
+      navigation.replace("Login");
+
+    }
+
+  } catch (err) {
+
+    console.log("SPLASH ERROR:", err);
+
+    navigation.replace("Login");
+  }
+};
 
     setTimeout(checkAuth, 1500);
 

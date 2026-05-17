@@ -1,16 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.luckyride</groupId>
-    <artifactId>rent-backend</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>rent-backend</name>
-    <description>Vehicle Rental Backend</description>
+    <artifactId>luckyride-backend</artifactId>
+    <version>1.0.0</version>
+    <name>LuckyRide Backend</name>
+    <description>Backend for LuckyRide System</description>
 
+    <!-- ✅ SPRING BOOT -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -23,43 +24,35 @@
     </properties>
 
     <dependencies>
-
+         
         <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
-            <version>0.11.5</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-            <version>0.11.5</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
-            <version>0.11.5</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <!-- SPRING WEB -->
+        <!-- 🌐 WEB -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- SPRING SECURITY -->
+        <!-- 🔐 SECURITY -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- SPRING DATA JPA -->
+        <!-- 🗄 DATABASE -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- 🐬 MYSQL -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- POSTGRESQL -->
@@ -69,7 +62,26 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- LOMBOK -->
+        <!-- 🔑 JWT -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- 📦 LOMBOK -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -77,35 +89,14 @@
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
-
-        <!-- SPRING BOOT sms email -->
-
-        <dependency>
-           <groupId>org.springframework.boot</groupId>
-           <artifactId>spring-boot-starter-mail</artifactId>
-        </dependency>
-
-
-        <!-- VALIDATION -->
+       
+        <!-- 📧 EMAIL -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
+            <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
-        <!-- JSON SUPPORT -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-
-        <!-- DEVTOOLS (AUTO RESTART DURING DEVELOPMENT) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- TESTING -->
+        <!-- 🧪 TEST -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -117,7 +108,7 @@
     <build>
         <plugins>
 
-            <!-- SPRING BOOT MAVEN -->
+            <!-- 🔥 SPRING BOOT RUN -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

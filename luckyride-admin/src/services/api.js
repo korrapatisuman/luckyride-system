@@ -6,13 +6,18 @@ const API = axios.create({
 
 // ✅ FIXED INTERCEPTOR
 API.interceptors.request.use((req) => {
+
   const token = localStorage.getItem("adminToken");
 
-  if (token) {
+  // ✅ don't attach token during login
+  if (
+    token &&
+    !req.url.includes("/admin/login")
+  ) {
     req.headers.Authorization = `Bearer ${token}`;
   }
 
-  return req; // ✅ VERY IMPORTANT
+  return req;
 });
 
 // ================= GLOBAL ERROR HANDLER =================
@@ -45,7 +50,7 @@ export const getDashboardData = () =>
 
 // ================= BOOKINGS =================
 export const getAllBookings = () =>
-  API.get("/admin/bookings");   // ✅ FIXED
+  API.get("/admin/bookings");  
 
 export const updateBookingStatus = (id, status) =>
   API.put(`/admin/bookings/${id}/status`, null, {
@@ -79,16 +84,21 @@ export const deleteDriverById = (id) =>
   API.delete(`/admin/drivers/${id}`);
 
 // ================= MARKETPLACE =================
+
+// 🔐 ADMIN ALL VEHICLES
 export const getAllMarketplaceVehicles = () =>
-  API.get("/admin/marketplace");   // ✅ FIXED
+  API.get("/market/admin/vehicles");
 
+// 🔐 APPROVE
 export const approveVehicle = (id) =>
-  API.put(`/admin/marketplace/${id}/approve`);
+  API.put(`/market/admin/${id}/approve`);
 
+// 🔐 REJECT
 export const rejectVehicle = (id) =>
-  API.put(`/admin/marketplace/${id}/reject`);
+  API.put(`/market/admin/${id}/reject`);
 
+// 🔐 DELETE
 export const deleteMarketplaceVehicleById = (id) =>
-  API.delete(`/admin/marketplace/${id}`);
+  API.delete(`/market/admin/${id}`);
 
 export default API;

@@ -22,17 +22,19 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // ✅ Handle all other exceptions
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex) {
+            // ✅ Handle all other exceptions
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex) {
 
-        return new ResponseEntity<>(
-                new ApiResponse<>(
-                        false,
-                        "Something went wrong",
-                        null
-                ),
-                HttpStatus.INTERNAL_SERVER_ERROR
-        );
-    }
+                     ex.printStackTrace(); // 🔥 THIS LINE IS KEY
+
+                return new ResponseEntity<>(
+                    new ApiResponse<>(
+                         false,
+                            ex.getMessage(), // ✅ show real error
+                           null
+                        ),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+        }
 }

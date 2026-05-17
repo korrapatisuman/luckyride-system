@@ -18,13 +18,17 @@ function DashboardPage() {
   }, []);
 
   const fetchDashboard = async () => {
-    try {
-      const res = await getDashboardData();
-      setData(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  try {
+    const res = await getDashboardData();
+
+    console.log("DASHBOARD:", res.data);
+
+    setData(res.data);
+
+  } catch (err) {
+    console.error("DASHBOARD ERROR:", err.response?.data);
+  }
+};
 
   const chartData = [
   { name: "Mon", bookings: 10 },
@@ -68,46 +72,46 @@ function DashboardPage() {
          <p>Track performance, manage rides, and grow your business 🚀</p>
         </div>
 
-      <div style={styles.grid}>
-        {cards.map((card, index) => (
-          <div key={index} style={styles.card}>
-            
-            <div
-  key={index}
-  style={styles.card}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.transform = "translateY(-6px)";
-    e.currentTarget.style.boxShadow = "0 10px 25px rgba(0,0,0,0.12)";
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.transform = "translateY(0)";
-    e.currentTarget.style.boxShadow = "0 6px 18px rgba(0,0,0,0.08)";
-  }}
->
+     <div style={styles.grid}>
+  {cards.map((card, index) => (
+    
+    <div
+      key={index}
+      style={styles.card}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-6px)";
+        e.currentTarget.style.boxShadow =
+          "0 10px 25px rgba(0,0,0,0.12)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow =
+          "0 6px 18px rgba(0,0,0,0.08)";
+      }}
+    >
 
-  <div style={styles.cardTop}>
-    <span style={styles.icon}>{card.icon}</span>
-    <span style={styles.title}>{card.title}</span>
-  </div>
-
-  <h2 style={styles.value}>{card.value}</h2>
-
-  <p
-    style={{
-      ...styles.trend,
-      color: card.trend.includes("-") ? "#ef4444" : "#22c55e"
-    }}
-  >
-    {card.trend}
-  </p>
-
-</div>
-
-            <h2 style={styles.value}>{card.value}</h2>
-
-          </div>
-        ))}
+      <div style={styles.cardTop}>
+        <span style={styles.icon}>{card.icon}</span>
+        <span style={styles.title}>{card.title}</span>
       </div>
+
+      <h2 style={styles.value}>{card.value}</h2>
+
+      <p
+        style={{
+          ...styles.trend,
+          color: card.trend.includes("-")
+            ? "#ef4444"
+            : "#22c55e"
+        }}
+      >
+        {card.trend}
+      </p>
+
+    </div>
+
+  ))}
+</div>
 
       
         <div style={styles.chartCard}>

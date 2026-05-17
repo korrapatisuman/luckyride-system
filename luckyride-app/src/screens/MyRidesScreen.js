@@ -15,25 +15,28 @@ export default function MyRidesScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // 🔥 FETCH BOOKINGS
-  const fetchRides = async () => {
-    try {
+   // 🔥 FETCH BOOKINGS
+const fetchRides = async () => {
+  try {
 
-      if (!global.user?.phone) {
-        console.log("No user phone found");
-        return;
-      }
+    const res = await API.get("/mobile/bookings/my");
 
-      const res = await API.get(`/bookings/user?login=${global.user?.phone || global.user?.email}`)
-      setRides(res.data || []);
+    setRides(res.data || []);
 
-    } catch (err) {
-      console.log("Fetch error:", err?.response?.data || err.message);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+  } catch (err) {
+
+    console.log(
+      "Fetch error:",
+      err?.response?.data || err.message
+    );
+
+  } finally {
+
+    setLoading(false);
+    setRefreshing(false);
+
+  }
+};
 
   useEffect(() => {
     fetchRides();

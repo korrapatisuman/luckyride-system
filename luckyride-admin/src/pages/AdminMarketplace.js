@@ -1,18 +1,24 @@
 import React, { useEffect, useState } from "react";
-import API from "../services/api"; // ✅ IMPORTANT
+import API from "../services/api";
 
 function AdminMarketplace() {
 
   const [vehicles, setVehicles] = useState([]);
 
-  // ✅ FETCH DATA
+  // ✅ FETCH MARKETPLACE VEHICLES
   const fetchVehicles = async () => {
     try {
-      const res = await API.get("/marketplace");
-      setVehicles(res.data || []);
+
+      // ✅ FIXED URL
+      const res = await API.get("/market/admin/vehicles");
+
+      console.log("Marketplace:", res.data);
+
+      setVehicles(res.data.data || res.data || []);
+
     } catch (err) {
       console.error(err);
-      setVehicles([]); // prevent crash
+      setVehicles([]);
     }
   };
 
@@ -20,11 +26,21 @@ function AdminMarketplace() {
     fetchVehicles();
   }, []);
 
-  // ✅ UPDATE STATUS
+  // ✅ APPROVE / REJECT
   const updateStatus = async (id, status) => {
     try {
-      await API.put(`/marketplace/${id}/status?status=${status}`);
+
+      if (status === "APPROVED") {
+
+        await API.put(`/market/admin/${id}/approve`);
+
+      } else {
+
+        await API.put(`/market/admin/${id}/reject`);
+      }
+
       fetchVehicles();
+
     } catch (err) {
       console.error(err);
       alert("Error updating status");
@@ -34,8 +50,11 @@ function AdminMarketplace() {
   // ✅ DELETE
   const deleteVehicle = async (id) => {
     try {
-      await API.delete(`/marketplace/${id}`);
+
+      await API.delete(`/market/admin/${id}`);
+
       fetchVehicles();
+
     } catch (err) {
       console.error(err);
       alert("Error deleting vehicle");
@@ -43,181 +62,196 @@ function AdminMarketplace() {
   };
 
   return (
-  <div style={styles.container}>
+    <div style={styles.container}>
 
-    <h2>Marketplace Vehicles 🚗</h2>
+      <h2>Marketplace Vehicles 🚗</h2>
 
-    {vehicles.length === 0 ? (
-      <p>No vehicles found</p>
-    ) : (
-      vehicles.map((v) => (
-        <div key={v.id} style={styles.card}>
+      {vehicles.length === 0 ? (
+        <p>No vehicles found</p>
+      ) : (
+        vehicles.map((v) => (
+          <div key={v.id} style={styles.card}>
 
-          {/* 🔥 MAIN IMAGE */}
-          <img
-            src={
-              v.images && v.images.length > 0
-                ? v.images[0]
-                : "https://via.placeholder.com/250"
-            }
-            style={styles.mainImage}
-          />
+            {/* MAIN IMAGE */}
+            <img
+              src={
+                v.images && v.images.length > 0
+                  ? v.images[0]
+                  : "https://via.placeholder.com/250"
+              }
+              alt="vehicle"
+              style={styles.mainImage}
+            />
 
-          {/* 🔥 IMAGE PREVIEW */}
-          <div style={styles.imageRow}>
-            {v.images?.map((img, i) => (
-              <img key={i} src={img} style={styles.thumb} />
-            ))}
+            {/* IMAGE ROW */}
+            <div style={styles.imageRow}>
+              {v.images?.map((img, i) => (
+                <img
+                  key={i}
+                  src={img}
+                  alt="preview"
+                  style={styles.thumb}
+                />
+              ))}
+            </div>
+
+            {/* INFO */}
+            <h3>
+              {v.brand} {v.model} ({v.year})
+            </h3>
+
+            <p><b>Fuel:</b> {v.fuelType}</p>
+
+            <p><b>Color:</b> {v.color || "N/A"}</p>
+
+            <p><b>Market Value:</b> ₹ {v.marketValue}</p>
+
+            <p style={{ color: "green", fontWeight: "bold" }}>
+              Final Price: ₹ {v.finalPrice || v.price}
+            </p>
+
+            <p>📍 {v.location}</p>
+
+            <p>📞 {v.phone}</p>
+
+            {/* DOCUMENTS */}
+            <div style={styles.section}>
+              <p><b>Insurance:</b> {v.insuranceValidTill}</p>
+
+              <p><b>Pollution:</b> {v.pollutionValidTill}</p>
+
+              <p><b>FC:</b> {v.fcValidTill}</p>
+
+              <p><b>Permit:</b> {v.permitValidTill || "N/A"}</p>
+            </div>
+
+            {/* DESCRIPTION */}
+            <p style={styles.desc}>
+              {v.description}
+            </p>
+
+            <p>
+              Status: <b>{v.status}</b>
+            </p>
+
+            {/* BUTTONS */}
+            <div style={styles.buttonRow}>
+
+              <button
+                style={styles.approve}
+                onClick={() => updateStatus(v.id, "APPROVED")}
+              >
+                ✅ Approve
+              </button>
+
+              <button
+                style={styles.reject}
+                onClick={() => updateStatus(v.id, "REJECTED")}
+              >
+                ❌ Reject
+              </button>
+
+              <button
+                style={styles.delete}
+                onClick={() => deleteVehicle(v.id)}
+              >
+                🗑 Delete
+              </button>
+
+            </div>
+
           </div>
+        ))
+      )}
 
-          {/* BASIC INFO */}
-          <h3>
-            {v.brand} {v.model} ({v.year})
-          </h3>
-
-          <p><b>Fuel:</b> {v.fuelType}</p>
-          <p><b>Color:</b> {v.color || "N/A"}</p>
-
-          {/* PRICE */}
-          <p><b>Market Value:</b> ₹ {v.marketValue}</p>
-          <p style={{ color: "green", fontWeight: "bold" }}>
-            Final Price: ₹ {v.finalPrice || v.price}
-          </p>
-
-          {/* LOCATION + CONTACT */}
-          <p>📍 {v.location}</p>
-          <p>📞 {v.phone}</p>
-
-          {/* DOCUMENT DETAILS */}
-          <div style={styles.section}>
-            <p><b>Insurance:</b> {v.insuranceValidTill}</p>
-            <p><b>Pollution:</b> {v.pollutionValidTill}</p>
-            <p><b>FC:</b> {v.fcValidTill}</p>
-            <p><b>Permit:</b> {v.permitValidTill || "N/A"}</p>
-          </div>
-
-          {/* DESCRIPTION */}
-          <p style={styles.desc}>
-            {v.description}
-          </p>
-
-          {/* STATUS */}
-          <p>Status: <b>{v.status}</b></p>
-
-          {/* ACTION BUTTONS */}
-          <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
-
-            <button
-              style={styles.approve}
-              onClick={() => updateStatus(v.id, "APPROVED")}
-            >
-              ✅ Approve
-            </button>
-
-            <button
-              style={styles.reject}
-              onClick={() => updateStatus(v.id, "REJECTED")}
-            >
-              ❌ Reject
-            </button>
-
-            <button
-              style={styles.delete}
-              onClick={() => deleteVehicle(v.id)}
-            >
-              🗑 Delete
-            </button>
-
-          </div>
-
-        </div>
-      ))
-    )}
-
-  </div>
-);
-
+    </div>
+  );
 }
 
+// ✅ STYLES
 const styles = {
+
   container: {
-    padding: "20px",
-    height: "600px",        // full screen height
-    overflowY: "auto",     // ✅ enable vertical scroll
-    background: "#f3f4f6"
+    padding: 20,
+    background: "#f5f5f5",
+    minHeight: "100vh"
   },
- card: {
-  background: "#fff",
-  padding: 20,
-  marginBottom: 20,
-  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-  margin: "auto"
-},
-  approve: {
-    background: "green",
-    color: "white",
-    border: "none",
-    padding: 8,
-    borderRadius: 5,
-    cursor: "pointer"
+
+  card: {
+    background: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 20,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
   },
-  reject: {
-    background: "orange",
-    color: "white",
-    border: "none",
-    padding: 8,
-    borderRadius: 5,
-    cursor: "pointer"
-  },
-  delete: {
-    background: "red",
-    color: "white",
-    border: "none",
-    padding: 8,
-    borderRadius: 5,
-    cursor: "pointer"
-  },
+
   mainImage: {
-  width: "100%",
-  height: "180px",
-  objectFit: "cover",
-  borderRadius: "10px",
-  marginBottom: "10px"
-},
+    width: "100%",
+    maxWidth: 300,
+    height: 200,
+    objectFit: "cover",
+    borderRadius: 10
+  },
 
-imageRow: {
-  display: "flex",
-  gap: "8px",
-  overflowX: "auto",   // ✅ horizontal scroll
-  paddingBottom: "5px"
-},
+  imageRow: {
+    display: "flex",
+    gap: 10,
+    marginTop: 10,
+    flexWrap: "wrap"
+  },
 
-thumb: {
-  width: "50px",
-  height: "50px",
-  objectFit: "cover",
-  borderRadius: "6px"
-},
+  thumb: {
+    width: 70,
+    height: 70,
+    objectFit: "cover",
+    borderRadius: 6
+  },
 
-section: {
-  background: "#f9fafb",
-  padding: "10px",
-  borderRadius: "6px",
-  marginTop: "10px"
-},
-thead: {
-  position: "sticky",
-  top: 0,
-  background: "#0f172a",
-  color: "#fff",
-  zIndex: 1
-},
+  section: {
+    marginTop: 10,
+    padding: 10,
+    background: "#fafafa",
+    borderRadius: 6
+  },
 
-desc: {
-  fontSize: "14px",
-  color: "#555",
-  marginTop: "10px"
-}
+  desc: {
+    marginTop: 10,
+    color: "#444"
+  },
+
+  buttonRow: {
+    display: "flex",
+    gap: 10,
+    marginTop: 15,
+    flexWrap: "wrap"
+  },
+
+  approve: {
+    padding: "10px 15px",
+    background: "green",
+    color: "#fff",
+    border: "none",
+    borderRadius: 6,
+    cursor: "pointer"
+  },
+
+  reject: {
+    padding: "10px 15px",
+    background: "orange",
+    color: "#fff",
+    border: "none",
+    borderRadius: 6,
+    cursor: "pointer"
+  },
+
+  delete: {
+    padding: "10px 15px",
+    background: "red",
+    color: "#fff",
+    border: "none",
+    borderRadius: 6,
+    cursor: "pointer"
+  }
 };
 
 export default AdminMarketplace;

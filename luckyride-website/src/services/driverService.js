@@ -1,9 +1,13 @@
 import API from "../api/api";
 
-export const getDrivers = () => API.get("/drivers");
+// ✅ GET ALL DRIVERS
+export const getDrivers = () =>
+  API.get("/web/drivers");
 
-export const addDriver = (data) =>
-  API.post("/drivers", data);
+// ✅ CREATE DRIVER
+export const createDriver = (data) =>
+  API.post("/admin/drivers", data);
 
+// ✅ DELETE DRIVER
 export const deleteDriver = (id) =>
-  API.delete(`/drivers/${id}`);
+  API.delete(`/admin/drivers/${id}`);

@@ -1,86 +1,168 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
+
+import API from "../services/api";
 
 export default function VehicleSelectionScreen({ navigation }) {
 
-  const selectVehicle = (vehicle) => {
+  const [vehicles, setVehicles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    navigation.navigate("Booking", {
-      vehicle: {
-        name: vehicle,
-        basePrice: 1500,
-        driverCharge: 500,
-        includedKm: 150,
-        extraKmPrice: 12
+  // ✅ FETCH VEHICLES FROM BACKEND
+  useEffect(() => {
+
+    const fetchVehicles = async () => {
+
+      try {
+
+        const res = await API.get("/mobile/vehicles");
+
+        console.log("VEHICLES:", res.data);
+
+        setVehicles(res.data.data);
+
+      } catch (err) {
+
+        console.log(
+          "Vehicle fetch error:",
+          err?.response?.data || err.message
+        );
+
+      } finally {
+        setLoading(false);
       }
-    });
+    };
 
-  };
+    fetchVehicles();
 
+  }, []);
+
+  // ✅ LOADING
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="green" />
+      </View>
+    );
+  }
+
+  // ✅ EMPTY
+  if (!vehicles.length) {
+    return (
+      <View style={styles.center}>
+        <Text>No Vehicles Found</Text>
+      </View>
+    );
+  }
+
+  // ✅ UI
   return (
 
     <View style={styles.container}>
 
-      <Text style={styles.title}>Select Your Vehicle</Text>
+      <Text style={styles.title}>
+        Select Your Vehicle
+      </Text>
 
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => selectVehicle("Auto")}
-      >
-        <Text style={styles.vehicle}>🚕 Auto</Text>
-      </TouchableOpacity>
+      <FlatList
+        data={vehicles}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
 
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => selectVehicle("Car 4+1")}
-      >
-        <Text style={styles.vehicle}>🚗 Car (4+1)</Text>
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() =>
+              navigation.navigate("Booking", {
 
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => selectVehicle("Traveller 12")}
-      >
-        <Text style={styles.vehicle}>🚐 Traveller (12 Seater)</Text>
-      </TouchableOpacity>
+              vehicle: item,
 
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => selectVehicle("Traveller 24")}
-      >
-        <Text style={styles.vehicle}>🚐 Traveller (24 Seater)</Text>
-      </TouchableOpacity>
+              tripType: "Outstation",
+
+              pickup: "Pickup Location",
+
+              drop: "Drop Location",
+
+              pickupDate: "2026-05-13",
+
+              days: 1,
+
+              distance: 0,
+
+              totalPrice: item.pricePerKm,
+
+              advance: Math.round(item.pricePerKm * 0.1)
+
+             })
+            }
+          >
+
+            <Text style={styles.vehicleName}>
+              {item.vehicleName}
+            </Text>
+
+            <Text>
+              Seating: {item.seatingCapacity}
+            </Text>
+
+            <Text>
+              ₹{item.pricePerKm}/KM
+            </Text>
+
+            <Text>
+              ₹{item.pricePerDay}/Day
+            </Text>
+
+            <Text>
+              Type: {item.vehicleType}
+            </Text>
+
+          </TouchableOpacity>
+        )}
+      />
 
     </View>
-
   );
 }
 
 const styles = StyleSheet.create({
 
-  container:{
-    flex:1,
-    justifyContent:"center",
-    alignItems:"center",
-    backgroundColor:"#fff"
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 15
   },
 
-  title:{
-    fontSize:26,
-    fontWeight:"bold",
-    marginBottom:30
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center"
   },
 
-  card:{
-    width:"80%",
-    padding:20,
-    backgroundColor:"#a8ee7a",
-    marginVertical:10,
-    borderRadius:10,
-    alignItems:"center"
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center"
   },
 
-  vehicle:{
-    fontSize:20
+  card: {
+    backgroundColor: "#f2f2f2",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15
+  },
+
+  vehicleName: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 5
   }
 
 });

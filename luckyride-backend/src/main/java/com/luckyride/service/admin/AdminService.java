@@ -1,27 +1,12 @@
-package com.luckyride.service;
+package com.luckyride.service.admin;
 
-import com.luckyride.model.Admin;
-import com.luckyride.model.AdminLoginRequest;
-
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Optional;
-
-import com.luckyride.util.TokenUtil;
-
-import com.luckyride.model.Driver;
-import com.luckyride.model.Vehicle;
-import com.luckyride.model.Booking;
-
-import com.luckyride.repository.AdminRepository;
-import com.luckyride.repository.BookingRepository;
-import com.luckyride.repository.VehicleRepository;
-import com.luckyride.repository.DriverRepository;
+import com.luckyride.model.*;
+import com.luckyride.repository.*;
+import com.luckyride.dto.request.AdminLoginRequest;
 
 import org.springframework.stereotype.Service;
 
-
+import java.util.*;
 
 @Service
 public class AdminService {
@@ -50,14 +35,8 @@ public class AdminService {
             throw new RuntimeException("Email and Password required");
         }
 
-        Optional<Admin> adminOptional =
-                adminRepository.findByEmail(request.getEmail());
-
-        if (adminOptional.isEmpty()) {
-            throw new RuntimeException("Admin not found");
-        }
-
-        Admin admin = adminOptional.get();
+        Admin admin = adminRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Admin not found"));
 
         if (!admin.getPassword().equals(request.getPassword())) {
             throw new RuntimeException("Invalid password");
@@ -69,6 +48,20 @@ public class AdminService {
                 "message", "Login Successful",
                 "token", token
         );
+    }
+
+    // 🔐 TOKEN VALIDATION
+    private void validateToken(String authHeader) {
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        String token = authHeader.substring(7);
+
+        if (!token.startsWith("ADMIN_")) {
+            throw new RuntimeException("Invalid Token");
+        }
     }
 
     // 📊 DASHBOARD
@@ -85,145 +78,155 @@ public class AdminService {
                 .mapToDouble(b -> b.getTotalPrice() != null ? b.getTotalPrice() : 0)
                 .sum();
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("totalBookings", totalBookings);
-        data.put("totalVehicles", totalVehicles);
-        data.put("totalDrivers", totalDrivers);
-        data.put("totalRevenue", totalRevenue);
-
-        return data;
+        return Map.of(
+                "totalBookings", totalBookings,
+                "totalVehicles", totalVehicles,
+                "totalDrivers", totalDrivers,
+                "totalRevenue", totalRevenue
+        );
     }
 
-    // 🔐 COMMON TOKEN VALIDATION
-    private void validateToken(String authHeader) {
+    // ================= DRIVERS =================
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Unauthorized");
-        }
-
-        String token = authHeader.substring(7);
-
-        if (!token.startsWith("ADMIN_")) {
-            throw new RuntimeException("Invalid Token");
-        }
-    }
-
-       // ================= DRIVERS =================
-    public List<?> getAllDrivers(String authHeader) {
+    public List<Driver> getAllDrivers(String authHeader) {
         validateToken(authHeader);
         return driverRepository.findAll();
     }
-        // ================= ADD DRIVERS =================
+
     public Driver createDriver(String authHeader, Driver driver) {
-         validateToken(authHeader);
-         return driverRepository.save(driver);
+        validateToken(authHeader);
+        return driverRepository.save(driver);
     }
 
-       // ================= BOOKINGS =================
-    public List<?> getAllBookings(String authHeader) {
-           validateToken(authHeader);
-           return bookingRepository.findAll();
+    public Object deleteDriver(String authHeader, Long id) {
+
+    validateToken(authHeader);
+
+    if (!driverRepository.existsById(id)) {
+        throw new RuntimeException("Driver not found");
     }
 
-        // ================= BOOKING STATUS =================
-    public Object updateBookingStatus(String authHeader, Long bookingId, String status) {
+    driverRepository.deleteById(id);
+
+    return Map.of(
+            "success", true,
+            "message", "Driver deleted successfully"
+    );
+   }
+
+    // ================= BOOKINGS =================
+
+    public List<Booking> getAllBookings(String authHeader) {
 
         validateToken(authHeader);
 
-        Optional<Booking> optionalBooking = bookingRepository.findById(bookingId);
+        List<Booking> bookings = bookingRepository.findAll();
 
-        if (optionalBooking.isEmpty()) {
-             throw new RuntimeException("Booking not found");
-        }
+          // ✅ FORCE LOAD
+        bookings.forEach(b -> {
 
-        Booking booking = optionalBooking.get();
+            b.getId();
+            b.getVehicleType();
+            b.getPickupLocation();
+            b.getDropLocation();
+            b.getStatus();
+        });
+
+        return bookings;
+    }
+
+    public Booking updateBookingStatus(String authHeader, Long id, String status) {
+
+        validateToken(authHeader);
+
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
 
         booking.setStatus(status);
-
         return bookingRepository.save(booking);
     }
 
-        // ================= ASSIGN DRIVER BOOKINGS =================
-    public Object assignDriver(String authHeader, Long bookingId, Map<String, Object> payload) {
+    public Booking assignDriver(String authHeader, Long id, Map<String, Object> payload) {
 
         validateToken(authHeader);
 
-        Optional<Booking> optionalBooking = bookingRepository.findById(bookingId);
-
-        if (optionalBooking.isEmpty()) {
-           throw new RuntimeException("Booking not found");
-        }
-
-        Booking booking = optionalBooking.get();
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
 
         Driver driver;
 
-            // ✅ CASE 1: Existing driver
         if (payload.get("driverId") != null) {
-
             Long driverId = Long.valueOf(payload.get("driverId").toString());
 
             driver = driverRepository.findById(driverId)
-                   .orElseThrow(() -> new RuntimeException("Driver not found"));
+                    .orElseThrow(() -> new RuntimeException("Driver not found"));
+        } else {
+            driver = new Driver();
+            driver.setName(payload.get("name").toString());
+            driver.setPhone(payload.get("phone").toString());
+
+            driver = driverRepository.save(driver);
         }
 
-            // ✅ CASE 2: New driver
-        else {
-             String name = payload.get("name").toString();
-             String phone = payload.get("phone").toString();
-
-             driver = new Driver();
-             driver.setName(name);
-             driver.setPhone(phone);
-
-             driver = driverRepository.save(driver); // 🔥 auto save to Drivers table
-        }
-
-            // Assign to booking
         booking.setDriverName(driver.getName());
         booking.setDriverPhone(driver.getPhone());
         booking.setStatus("DRIVER_ASSIGNED");
 
         return bookingRepository.save(booking);
-    }  
+    }
 
-        // ================= VEHICLES =================
+    public Object deleteBooking(String authHeader, Long id) {
 
-    public List<?> getAllVehicles(String authHeader) {
-         validateToken(authHeader);
-         return vehicleRepository.findAll();
+    validateToken(authHeader);
+
+    if (!bookingRepository.existsById(id)) {
+        throw new RuntimeException("Booking not found");
+    }
+
+    bookingRepository.deleteById(id);
+
+    return Map.of(
+            "success", true,
+            "message", "Booking deleted successfully"
+    );
+}
+
+    // ================= VEHICLES =================
+
+    public List<Vehicle> getAllVehicles(String authHeader) {
+        validateToken(authHeader);
+        return vehicleRepository.findAll();
     }
 
     public Vehicle createVehicle(String authHeader, Vehicle vehicle) {
-         validateToken(authHeader);
-         return vehicleRepository.save(vehicle);
+        validateToken(authHeader);
+        return vehicleRepository.save(vehicle);
     }
 
     public Object deleteVehicle(String authHeader, Long id) {
-         validateToken(authHeader);
+        validateToken(authHeader);
 
-         if (!vehicleRepository.existsById(id)) {
-              throw new RuntimeException("Vehicle not found");
+        if (!vehicleRepository.existsById(id)) {
+            throw new RuntimeException("Vehicle not found");
         }
 
-         vehicleRepository.deleteById(id);
-         return Map.of("message", "Vehicle deleted");
+        vehicleRepository.deleteById(id);
+        return Map.of("message", "Vehicle deleted");
     }
 
-    public Vehicle updateVehicle(String authHeader, Long id, Vehicle updatedVehicle) {
+    public Vehicle updateVehicle(String authHeader, Long id, Vehicle updated) {
 
-         validateToken(authHeader);
+        validateToken(authHeader);
 
         Vehicle vehicle = vehicleRepository.findById(id)
-                  .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
 
-          // ✅ correct fields
-         vehicle.setVehicleName(updatedVehicle.getVehicleName());
-         vehicle.setVehicleType(updatedVehicle.getVehicleType());
-         vehicle.setSeatingCapacity(updatedVehicle.getSeatingCapacity());
-         vehicle.setPricePerKm(updatedVehicle.getPricePerKm());
-         vehicle.setImageUrl(updatedVehicle.getImageUrl());
-        
-         return vehicleRepository.save(vehicle);
+        vehicle.setVehicleName(updated.getVehicleName());
+        vehicle.setVehicleType(updated.getVehicleType());
+        vehicle.setSeatingCapacity(updated.getSeatingCapacity());
+        vehicle.setPricePerKm(updated.getPricePerKm());
+        vehicle.setImageUrl(updated.getImageUrl());
+
+        return vehicleRepository.save(vehicle);
     }
 }

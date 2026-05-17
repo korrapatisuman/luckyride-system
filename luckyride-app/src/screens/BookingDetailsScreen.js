@@ -65,28 +65,37 @@ export default function BookingDetailsScreen({ route, navigation }) {
   // 📏 DISTANCE
   const calculateDistance = async () => {
 
-    useEffect(() => {
-      if (tripType === "Outstation" && pickupCoords && dropCoords) {
-    calculateDistance();
-    }
-   }, [pickupCoords, dropCoords]);
+  if (!pickupCoords) {
+    alert("Please select pickup from suggestions");
+    return;
+  }
 
-    if (!pickupCoords || !dropCoords) {
-      alert("Select locations properly");
-      return;
-    }
+  if (!dropCoords) {
+    alert("Please select drop from suggestions");
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      const km = await getDistance(pickupCoords, dropCoords);
-      setDistance(km);
-    } catch (err) {
-      alert("Distance calculation failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+
+    const km = await getDistance(
+      pickupCoords,
+      dropCoords
+    );
+
+    setDistance(km);
+
+  } catch (err) {
+
+    alert("Distance calculation failed");
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
 
   return (
     <ScrollView style={styles.container}>
@@ -113,7 +122,7 @@ export default function BookingDetailsScreen({ route, navigation }) {
         </View>
       )}
 
-      // DROP (ONLY FOR OUTSTATION)
+      {/* DROP (ONLY FOR OUTSTATION) */}
        {tripType === "Outstation" && (
        <>
             <TextInput
@@ -136,7 +145,7 @@ export default function BookingDetailsScreen({ route, navigation }) {
       )}
 
       {/* DISTANCE BUTTON */}
-      {tripType === "Long Trip" && (
+      {tripType === "Outstation" && (
         <TouchableOpacity style={styles.calcBtn} onPress={calculateDistance}>
           {loading ? (
             <ActivityIndicator color="#fff" />
@@ -196,7 +205,7 @@ export default function BookingDetailsScreen({ route, navigation }) {
             return;
           }
 
-          if (tripType === "Long Trip") {
+          if (tripType === "Outstation") {
             if (!drop) {
               alert("Enter drop location");
               return;
@@ -212,7 +221,7 @@ export default function BookingDetailsScreen({ route, navigation }) {
             tripType,
             vehicle,
             pickup,
-            drop: tripType === "Local Trip" ? pickup : drop,
+            drop: tripType === "Local" ? pickup : drop,
             pickupDate,
             days,
             distance

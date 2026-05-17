@@ -22,27 +22,18 @@ export default function BookingScreen({ route, navigation }) {
 
     if (loading) return;
 
-    // ❗ SAFETY CHECK (VERY IMPORTANT)
-    if (!global.user?.phone) {
-      Alert.alert("Error", "User not logged in properly");
-      return;
-    }
-
     setLoading(true);
 
     try {
 
       const bookingData = {
-        userPhone: global.user?.phone,
-
-        vehicleId: vehicle?.id,   // ✅ MUST ADD (backend needs this)
-
+        vehicleId: vehicle?.id,
         vehicleType: vehicle?.vehicleType,
-        tripType: tripType,
-        pickupDate: pickupDate,
+        tripType,
+        pickupDate,
         days: Number(days),
-        distance: distance || 0,
-        totalPrice: totalPrice,
+        distance,
+        totalPrice,
         advancePaid: advance,
         status: "BOOKED",
         pickupLocation: pickup,
@@ -51,7 +42,7 @@ export default function BookingScreen({ route, navigation }) {
 
       console.log("📤 Sending booking:", bookingData);
 
-      const res = await API.post("/bookings", bookingData);
+      const res = await API.post("/mobile/bookings", bookingData);
 
       console.log("✅ Booking Success:", res.data);
 

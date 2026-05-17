@@ -71,8 +71,10 @@ function OtpLoginPage() {
       otp
     });
 
+    console.log("VERIFY RESPONSE:", res.data);
+
     // ✅ Save token
-    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("token", res.data.data.token);
     localStorage.setItem("login", login);
 
     // 🔥 trigger navbar update

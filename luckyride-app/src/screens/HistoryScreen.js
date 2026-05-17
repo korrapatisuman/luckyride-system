@@ -14,7 +14,7 @@ export default function HistoryScreen() {
   const fetchBookings = async () => {
     try {
 
-      const response = await API.get("/bookings");
+      const response = await API.get("/mobile/bookings/my");
       setBookings(response.data);
 
     } catch (error) {

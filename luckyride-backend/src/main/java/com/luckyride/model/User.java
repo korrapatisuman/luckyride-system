@@ -1,9 +1,13 @@
 package com.luckyride.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import java.time.LocalDateTime;
 
+import java.time.LocalDateTime;
+import lombok.Data;
+import lombok.*;
+
+@Getter
+@Setter
 @Entity
 @Table(name = "users")
 @Data
@@ -12,11 +16,9 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    
-    private String token;
-    private String firstName;
 
+    // ✅ BASIC
+    private String firstName;
     private String lastName;
 
     @Column(unique = true)
@@ -24,13 +26,17 @@ public class User {
 
     private String email;
 
+    // 🔐 OPTIONAL (if using password login later)
     private String password;
 
+    // ✅ ROLE
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
 
-    private String status;
+    // ✅ STATUS
+    private String status = "ACTIVE";
 
+    // ✅ TIME
     private LocalDateTime createdAt;
 }

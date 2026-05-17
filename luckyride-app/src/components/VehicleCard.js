@@ -6,26 +6,32 @@ export default function VehicleCard({ vehicle, onSelect }) {
 
     <TouchableOpacity style={styles.card} onPress={onSelect}>
 
-      <Text style={styles.name}>{vehicle.name}</Text>
+      <Text style={styles.name}>{vehicle.vehicleName}</Text>
 
       <View style={styles.row}>
         <Text style={styles.label}>Base Price:</Text>
-        <Text style={styles.value}>₹{vehicle.basePrice}</Text>
+        <Text style={styles.value}>₹{vehicle.pricePerDay}</Text>
       </View>
 
       <View style={styles.row}>
         <Text style={styles.label}>Driver Charge:</Text>
-        <Text style={styles.value}>₹{vehicle.driverCharge}</Text>
+        <Text style={styles.value}>
+             {vehicle.seatingCapacity} Seats
+        </Text>
       </View>
 
       <View style={styles.row}>
         <Text style={styles.label}>Included KM:</Text>
-        <Text style={styles.value}>{vehicle.includedKm} km</Text>
+        <Text style={styles.value}>
+            ₹{vehicle.pricePerKm}/km
+        </Text>
       </View>
 
       <View style={styles.row}>
         <Text style={styles.label}>Extra KM:</Text>
-        <Text style={styles.value}>₹{vehicle.extraKmPrice}/km</Text>
+        <Text style={styles.value}>
+          {vehicle.vehicleType}
+        </Text>
       </View>
 
       <View style={styles.selectBtn}>

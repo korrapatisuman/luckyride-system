@@ -3,13 +3,18 @@ import { useEffect } from "react";
 import MapPicker from "./MapPicker";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { getVehicles } from "../services/vehicleService";
 import { createBooking } from "../services/bookingService";
 import VehicleCard from "./VehicleCard";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 
 
 function BookingForm() {
+
+  const [vehicles, setVehicles] = useState([]);
+  const [selectedVehicle, setSelectedVehicle] = useState(null); // ✅ MUST BE HERE
 
   const [form, setForm] = useState({
     tripType: "LOCAL",
@@ -20,7 +25,7 @@ function BookingForm() {
   });
 
 
-  const vehicles = ["Auto", "Car 4+1", "Traveller 12 Seater"];
+ 
   const [pickupCoords, setPickupCoords] = useState(null);
   const [dropCoords, setDropCoords] = useState(null);
   const [distance, setDistance] = useState(0); // default
@@ -62,7 +67,7 @@ useEffect(() => {
 
   // 💰 Fare calculation
   const calculateFare = () => {
-    const distanceValue = distance || 10;
+    const d = distance || 10;
     const days = form.days || 1;
 
     let rate = 20;
@@ -86,7 +91,7 @@ useEffect(() => {
     if (form.tripType === "LOCAL") {
       totalKm = 80 * days;
     } else {
-      const roundTrip = distance * 2;
+      const roundTrip = d * 2;
       const minKm = days * 300;
       totalKm = Math.max(roundTrip, minKm);
     }
@@ -94,42 +99,89 @@ useEffect(() => {
     return totalKm * rate;
   };
 
+    useEffect(() => {
+    fetchVehicles();
+  }, []);
+    
+    const fetchVehicles = async () => {
+
+    try {
+
+      const res = await getVehicles();
+
+      console.log("API RESPONSE 👉", res.data);
+
+      // ✅ IMPORTANT
+      setVehicles(res.data.data || []);
+
+    } catch (err) {
+
+      console.error("FETCH ERROR 👉", err);
+
+      setVehicles([]);
+    }
+  };
+
    const handleBooking = async () => {
+
   if (!form.pickupLocation || !form.dropLocation) {
     alert("Please fill all fields");
     return;
   }
 
   try {
-    const login = localStorage.getItem("login");
 
-    if (!login) {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
       alert("Please login again 🔐");
       navigate("/login");
       return;
     }
 
+    // ✅ FIX DATE FORMAT
+    const formattedDate = pickupDate
+      ? new Date(pickupDate).toISOString().split("T")[0]
+      : null;
+
     const payload = {
-      ...form,
-      pickupDate,
-      distance,
-      status: "REQUESTED"
+
+      // ❌ REMOVE THIS
+      // userId: 1,
+
+      userPhone: form.userPhone,
+
+      vehicleId: form.vehicleId,
+
+      vehicleType: form.vehicleType,
+
+      tripType: form.tripType,
+
+      pickupLocation: form.pickupLocation,
+
+      dropLocation: form.dropLocation,
+
+      days: Number(form.days),
+
+      distance: Number(distance),
+
+      totalPrice: Number(calculateFare()),
+
+      pickupDate: new Date().toISOString().slice(0, 19).replace("T", " ")
     };
 
-    if (login.includes("@")) {
-      payload.userEmail = login;
-    } else {
-      payload.userPhone = login;
-    }
+    console.log("BOOKING PAYLOAD 👉", payload);
 
-    const res = await createBooking(payload);
+    await createBooking(payload);
 
     alert("Booking Created 🚖");
 
-    navigate("/mybookings"); // ✅ IMPORTANT
+    navigate("/bookings");
 
   } catch (err) {
-    console.error(err);
+
+    console.error("BOOKING ERROR 👉", err);
+
     alert("Booking Failed ❌");
   }
 };
@@ -153,16 +205,35 @@ useEffect(() => {
 
     {/* 2. Vehicle Selection */}
     <div style={styles.vehicleRow}>
-      {vehicles.map((v) => (
-        <VehicleCard
-          key={v}
-          type={v}
-          selected={form.vehicleType}
-          onSelect={(type) =>
-            setForm({ ...form, vehicleType: type })
-          }
-        />
+     <select
+       style={styles.input}
+       value={selectedVehicle?.id || ""}
+      onChange={(e) => {
+
+  const vehicle = vehicles.find(
+    (v) => v.id === Number(e.target.value)
+  );
+
+  setSelectedVehicle(vehicle);
+
+  setForm({
+    ...form,
+    vehicleId: vehicle?.id,
+    vehicleType: vehicle?.vehicleType
+  });
+}}
+    >
+
+      <option value="">Select Vehicle</option>
+
+      {Array.isArray(vehicles) &&
+        vehicles.map((v) => (
+          <option key={v.id} value={v.id}>
+            {v.vehicleName} ({v.vehicleType})
+          </option>
       ))}
+
+    </select>
     </div>
 
     {/* Mobile Number */}
@@ -266,12 +337,12 @@ useEffect(() => {
     {/* Date */}
     <div style={styles.inputWrapper}>
       <DatePicker
-        selected={pickupDate}
-        onChange={(date) => setPickupDate(date)}
-        minDate={new Date()}
-        placeholderText="Select Pickup Date"
-        className="date-input"
-      />
+  selected={pickupDate}
+  onChange={(date) => setPickupDate(date)}
+  minDate={new Date()}
+  placeholderText="Select Pickup Date"
+  style={styles.input}
+/>
     </div>
 
     {/* Days */}
@@ -320,55 +391,88 @@ useEffect(() => {
 const styles = {
 
   container: {
-    background: "rgba(255,255,255,0.12)",
-    backdropFilter: "blur(12px)",
-    padding: 20,
-    borderRadius: 12,
-    color: "white",
-    width: "300px",   // 👈 smaller
-    margin: "auto"
+    maxWidth: "500px",
+    margin: "30px auto",
+    padding: "25px",
+    background: "#fff",
+    borderRadius: "14px",
+    boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px"
   },
 
   input: {
     width: "100%",
-    padding: "8px",
-    marginTop: "8px",
-    borderRadius: "6px",
-    border: "none",
-    fontSize: "14px"
+    height: "48px",
+    padding: "0 14px",
+    border: "1px solid #d1d5db",
+    borderRadius: "10px",
+    fontSize: "15px",
+    outline: "none",
+    boxSizing: "border-box",
+    background: "#fff"
   },
 
   vehicleRow: {
+    width: "100%"
+  },
+
+  locationRow: {
     display: "flex",
-    gap: "8px",
-    marginTop: "10px"
+    alignItems: "center",
+    gap: "10px"
+  },
+
+  locationInput: {
+    flex: 1,
+    height: "48px",
+    padding: "0 14px",
+    border: "1px solid #d1d5db",
+    borderRadius: "10px",
+    fontSize: "15px",
+    outline: "none"
+  },
+
+  mapBtn: {
+    width: "48px",
+    height: "48px",
+    border: "none",
+    borderRadius: "10px",
+    background: "#2563eb",
+    color: "#fff",
+    fontSize: "18px",
+    cursor: "pointer"
   },
 
   fareBox: {
-    marginTop: 10,
-    padding: 10,
-    background: "#22c55e",
-    borderRadius: 6,
-    fontWeight: "bold",
-    fontSize: "14px"
+    padding: "14px",
+    background: "#eff6ff",
+    borderRadius: "10px",
+    fontWeight: "600",
+    fontSize: "16px",
+    color: "#1d4ed8"
   },
 
   button: {
-    marginTop: 12,
-    padding: 10,
     width: "100%",
-    background: "#16a34a",
-    color: "white",
+    height: "50px",
     border: "none",
-    borderRadius: 6,
-    cursor: "pointer",
-    fontSize: "14px"
+    borderRadius: "10px",
+    background: "#16a34a",
+    color: "#fff",
+    fontSize: "16px",
+    fontWeight: "600",
+    cursor: "pointer"
   },
 
   success: {
-    marginTop: 10,
-    color: "#4ade80",
-    fontSize: "14px"
+    padding: "14px",
+    background: "#dcfce7",
+    borderRadius: "10px",
+    color: "#166534",
+    fontWeight: "600",
+    textAlign: "center"
   },
 
   locationRow: {

@@ -1,11 +1,12 @@
-package com.luckyride.controller;
+package com.luckyride.controller.admin;
 
-import com.luckyride.model.AdminLoginRequest;
-import com.luckyride.service.AdminService;
-import com.luckyride.model.Booking;
+import com.luckyride.dto.request.AdminLoginRequest;
+
+
 import com.luckyride.model.Driver;
-
 import com.luckyride.model.Vehicle;
+import com.luckyride.service.admin.AdminService;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -21,116 +22,114 @@ public class AdminController {
         this.adminService = adminService;
     }
 
-    private String extractToken(String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Unauthorized");
-        }
-            return authHeader.substring(7);
-    }
-
     // 🔐 LOGIN
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody AdminLoginRequest request) {
-           return adminService.login(request);
-        }
+        return adminService.login(request);
+    }
 
     // 📊 DASHBOARD
     @GetMapping("/dashboard")
     public Map<String, Object> dashboard(
             @RequestHeader("Authorization") String authHeader
     ) {
-        String token = extractToken(authHeader);
-        return adminService.getDashboard(token);
+        return adminService.getDashboard(authHeader);
     }
 
-      // ================= DRIVERS =================
+    // ================= DRIVERS =================
+
     @GetMapping("/drivers")
-    public Object getDrivers(
-            @RequestHeader("Authorization") String authHeader
-    ) {
-         String token = extractToken(authHeader);
-         return adminService.getAllDrivers(token);
+    public Object getDrivers(@RequestHeader("Authorization") String authHeader) {
+        return adminService.getAllDrivers(authHeader);
     }
 
-    // ================= ADD DRIVER =================
     @PostMapping("/drivers")
     public Object addDriver(
             @RequestHeader("Authorization") String authHeader,
             @RequestBody Driver driver
     ) {
-         String token = extractToken(authHeader);
-         return adminService.createDriver(token, driver);
+        return adminService.createDriver(authHeader, driver);
     }
 
-      // ================= BOOKINGS =================
+    @DeleteMapping("/drivers/{id}")
+    public Object deleteDriver(
+           @RequestHeader("Authorization") String authHeader,
+           @PathVariable Long id
+    ) {
+        return adminService.deleteDriver(authHeader, id);
+    }
+
+    // ================= BOOKINGS =================
+
     @GetMapping("/bookings")
     public Object getBookings(
-            @RequestHeader("Authorization") String authHeader
-    ) { 
-        String token = extractToken(authHeader);
-        return adminService.getAllBookings(token);
+           @RequestHeader("Authorization") String authHeader
+    ) {
+
+            System.out.println("🔥 ADMIN BOOKINGS API HIT");
+
+            Object result = adminService.getAllBookings(authHeader);
+
+            System.out.println("🔥 BOOKINGS RESULT: " + result);
+
+        return result;
     }
 
-       // ================= BOOKING STATUS =================
     @PutMapping("/bookings/{id}/status")
     public Object updateStatus(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable Long id,
             @RequestParam String status
-    ) { 
-        String token = extractToken(authHeader);
-        return adminService.updateBookingStatus(token, id, status);
+    ) {
+        return adminService.updateBookingStatus(authHeader, id, status);
     }
 
-      // ================= ASSIGN DRIVER BOOKING =================
     @PutMapping("/bookings/{id}/assign-driver")
     public Object assignDriver(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable Long id,
             @RequestBody Map<String, Object> payload
-    ) { 
-         String token = extractToken(authHeader);
-         return adminService.assignDriver(token, id, payload);
+    ) {
+        return adminService.assignDriver(authHeader, id, payload);
     }
 
-       // ================= VEHICLES =================
+    @DeleteMapping("/bookings/{id}")
+    public Object deleteBooking(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable Long id
+     ) {
+         return adminService.deleteBooking(authHeader, id);
+    }
 
-     // ✅ GET ALL VEHICLES
+    // ================= VEHICLES =================
+
     @GetMapping("/vehicles")
     public Object getVehicles(@RequestHeader("Authorization") String authHeader) {
-          String token = extractToken(authHeader);
-          return adminService.getAllVehicles(token);
+        return adminService.getAllVehicles(authHeader);
     }
 
-     // ✅ ADD VEHICLE
     @PostMapping("/vehicles")
     public Object addVehicle(
             @RequestHeader("Authorization") String authHeader,
             @RequestBody Vehicle vehicle
-    ) { 
-         String token = extractToken(authHeader);
-         return adminService.createVehicle(token, vehicle);
+    ) {
+        return adminService.createVehicle(authHeader, vehicle);
     }
 
-     // ✅ DELETE VEHICLE
     @DeleteMapping("/vehicles/{id}")
     public Object deleteVehicle(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable Long id
-    ) {  
-         String token = extractToken(authHeader);
-         return adminService.deleteVehicle(token, id);
+    ) {
+        return adminService.deleteVehicle(authHeader, id);
     }
 
-     // ✅ UPDATE VEHICLE (EDIT)
     @PutMapping("/vehicles/{id}")
     public Object updateVehicle(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable Long id,
             @RequestBody Vehicle vehicle
-    ) {   
-          String token = extractToken(authHeader);
-          return adminService.updateVehicle(token, id, vehicle);
+    ) {
+        return adminService.updateVehicle(authHeader, id, vehicle);
     }
-    
 }

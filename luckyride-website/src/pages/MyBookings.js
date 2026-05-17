@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { getUserBookings } from "../services/bookingService";
+import { getMyBookings } from "../services/bookingService";
 import { useNavigate } from "react-router-dom";
 import API from "../api/api";
+
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);
@@ -9,35 +10,56 @@ function MyBookings() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
+    useEffect(() => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    navigate("/login");
+    return;
+  }
+
+  fetchBookings();
+}, []);
+
+const fetchBookings = async () => {
+
+  try {
+
+    setLoading(true);
+
+    // ✅ GET LOGIN
     const login = localStorage.getItem("login");
 
     if (!login) {
-      alert("Please login");
+      alert("Login missing");
       navigate("/login");
       return;
     }
 
-    fetchBookings(login);
-  }, []);
+    // ✅ PASS LOGIN
+    const res = await getMyBookings(login);
 
-  const fetchBookings = async (login) => {
-    try {
-      setLoading(true);
-      const res = await getUserBookings(login);
-      console.log("Bookings 👉", res.data); // DEBUG
-      setBookings(res.data);
-    } catch (err) {
-      console.error("❌ Error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    console.log("Bookings 👉", res.data);
+
+    setBookings(res.data.data || res.data || []);
+
+  } catch (err) {
+
+    console.error(
+      "❌ Error:",
+      err.response?.data || err.message
+    );
+
+  } finally {
+
+    setLoading(false);
+  }
+};
 
   // ✅ PAYMENT FIX (correct API)
   const handlePayment = async (id, method) => {
   try {
-    await API.put(`/bookings/${id}/pay?method=${method}`);
+    await API.put(`/web/bookings/${id}/pay?method=${method}`);
 
     alert(`Payment via ${method} Successful ✅`);
 

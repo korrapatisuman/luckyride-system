@@ -1,18 +1,25 @@
 import API from "../api/api";
 
 // 🚗 NORMAL VEHICLES
-export const getVehicles = () => API.get("/vehicles");
+export const getVehicles = () =>
+  API.get("/web/vehicles");
 
-export const createVehicle = (data) => API.post("/vehicles", data);
+// 🚗 CREATE VEHICLE
+export const createVehicle = (data) =>
+  API.post("/admin/vehicles", data);
 
-export const deleteVehicle = (id) => API.delete(`/vehicles/${id}`);
+// 🚗 DELETE VEHICLE
+export const deleteVehicle = (id) =>
+  API.delete(`/admin/vehicles/${id}`);
 
-// 🛒 MARKETPLACE
+// 🛒 MARKETPLACE VEHICLES
 export const getMarketplaceVehicles = () =>
-  API.get("/marketplace/approved");
+  API.get("/marketplace/vehicles");
 
+// 🛒 ADD MARKETPLACE VEHICLE
 export const addMarketplaceVehicle = (data) =>
-  API.post("/marketplace", data);
+  API.post("/marketplace/vehicles", data);
 
+// 🛒 DELETE MARKETPLACE VEHICLE
 export const deleteMarketplaceVehicle = (id) =>
-  API.delete(`/marketplace/${id}`);
+  API.delete(`/admin/marketplace/${id}`);

@@ -25,11 +25,17 @@ const handleLogin = async (e) => {
     alert("Login Successful");
     navigate("/dashboard");
 
-  } catch (err) {
-    alert("Login Failed");
-  } finally {
-    setLoading(false);
   }
+  catch (err) {
+  console.log("FULL ERROR:", err);
+  console.log("ERROR RESPONSE:", err.response);
+
+  alert(
+    err.response?.data?.message ||
+    err.response?.data ||
+    "Login Failed"
+  );
+}
 };
 
 
@@ -63,8 +69,20 @@ useEffect(() => {
       <p style={styles.subtitle}>Welcome back</p>
 
       <form onSubmit={handleLogin}>
-        <input type="email" placeholder="Admin Email" style={styles.input} />
-        <input type="password" placeholder="Password" style={styles.input} />
+       <input
+         type="email"
+          placeholder="Admin Email"
+          style={styles.input}
+          value={email}
+           onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+           type="password"
+           placeholder="Password"
+           style={styles.input}
+           value={password}
+           onChange={(e) => setPassword(e.target.value)}
+        />
 
         <button type="submit" style={styles.button}>
           {loading ? "Logging in..." : "Login"}

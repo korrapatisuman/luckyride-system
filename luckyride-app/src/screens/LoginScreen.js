@@ -61,8 +61,7 @@ export default function LoginScreen({ navigation }) {
     }
   };
 
-
-     // ✅ VERIFY OTP (FINAL FIXED VERSION)
+  // ✅ VERIFY OTP
 const verifyOtp = async () => {
 
   console.log("VERIFY INPUT:", input, otp);
@@ -75,42 +74,64 @@ const verifyOtp = async () => {
   setLoading(true);
 
   try {
+
     const payload = isEmail
-      ? { email: input.trim(), otp: otp.trim() }
-      : { phone: input.trim(), otp: otp.trim() };
+      ? {
+          email: input.trim(),
+          otp: otp.trim()
+        }
+      : {
+          phone: input.trim(),
+          otp: otp.trim()
+        };
 
     console.log("VERIFY PAYLOAD:", payload);
 
     const res = await API.post("/auth/verify-otp", payload);
 
-    console.log("VERIFY RESPONSE FULL:", JSON.stringify(res.data, null, 2));
+    console.log(
+      "VERIFY RESPONSE:",
+      JSON.stringify(res.data, null, 2)
+    );
 
-    // ✅ SAFE EXTRACTION
+    // ✅ RESPONSE DATA
     const success = res?.data?.success;
     const token = res?.data?.data?.token;
 
-    console.log("TOKEN DEBUG:", token);
+    console.log("TOKEN:", token);
 
+    // ❌ LOGIN FAILED
     if (!success) {
       alert(res?.data?.message || "OTP verification failed");
       return;
     }
 
+    // ❌ TOKEN MISSING
     if (!token) {
-      alert("Login failed: Token missing from response");
+      alert("Token missing from server");
       return;
     }
 
-    // ✅ SAVE TOKEN (GLOBAL)
-    global.userToken = token;
+    // ✅ SAVE USER
+    const userData = {
+      phone: isEmail ? null : input.trim(),
+      email: isEmail ? input.trim() : null
+    };
 
-    // ✅ SAVE TOKEN (PERSIST)
+    await AsyncStorage.setItem(
+      "user",
+      JSON.stringify(userData)
+    );
+
+    // ✅ GLOBAL USER (OPTIONAL)
+    global.user = userData;
+    await AsyncStorage.removeItem("token");
+
     await AsyncStorage.setItem("token", token);
 
-    // ✅ SET HEADER (IMMEDIATE USE)
-    API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    const savedToken = await AsyncStorage.getItem("token");
 
-    console.log("✅ TOKEN SAVED:", token);
+    console.log("✅ SAVED TOKEN:", savedToken);
 
     alert("Login Successful ✅");
 
@@ -118,17 +139,19 @@ const verifyOtp = async () => {
 
   } catch (err) {
 
-    console.log("VERIFY OTP ERROR FULL:", err);
+    console.log("VERIFY OTP ERROR:", err);
 
     const msg =
       err?.response?.data?.message ||
       err?.message ||
       "Something went wrong";
 
-    alert(msg);
+    alert(String(msg));
 
   } finally {
+
     setLoading(false);
+
   }
 };
 

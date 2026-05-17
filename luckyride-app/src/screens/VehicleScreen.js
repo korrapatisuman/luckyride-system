@@ -17,7 +17,7 @@ export default function VehicleScreen({ navigation, route }) {
   // 🔥 FETCH VEHICLES FROM BACKEND
     const fetchVehicles = async () => {
   try {
-    const res = await API.get("/vehicles");
+    const res = await API.get("/mobile/vehicles");
 
     console.log("VEHICLES RAW:", res.data);
 
@@ -57,13 +57,20 @@ export default function VehicleScreen({ navigation, route }) {
   };
 
   const getIcon = (type) => {
-    switch (type) {
-      case "Auto": return "🛺";
-      case "Car": return "🚗";
-      case "Traveller": return "🚐";
-      default: return "🚗";
-    }
-  };
+  switch (type) {
+    case "AUTO":
+      return "🛺";
+
+    case "CAR":
+      return "🚗";
+
+    case "TRAVELLER":
+      return "🚐";
+
+    default:
+      return "🚗";
+  }
+};
 
   const renderItem = ({ item }) => {
 
@@ -99,7 +106,15 @@ export default function VehicleScreen({ navigation, route }) {
   };
 
   // ⏳ LOADING
-   if (!loading && vehicles.length === 0) {
+  if (loading) {
+  return (
+    <View style={styles.center}>
+      <Text>Loading vehicles...</Text>
+    </View>
+  );
+}
+
+if (vehicles.length === 0) {
   return (
     <View style={styles.center}>
       <Text>No vehicles available</Text>

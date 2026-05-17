@@ -10,14 +10,22 @@ function BuyVehicles() {
   }, []);
 
   const fetchVehicles = async () => {
-    try {
-      const res = await getMarketplaceVehicles(); // ✅ correct API
-      setVehicles(res.data || []); // ✅ safety
-    } catch (err) {
-      console.error("Error:", err);
-      setVehicles([]); // ✅ fallback
-    }
-  };
+  try {
+    const res = await getMarketplaceVehicles();
+
+    console.log("API RESPONSE:", res.data);
+
+    setVehicles(
+      Array.isArray(res.data)
+        ? res.data
+        : res.data.data || []
+    );
+
+  } catch (err) {
+    console.error("Error:", err);
+    setVehicles([]);
+  }
+};
 
   return (
     <div style={styles.container}>
@@ -26,10 +34,11 @@ function BuyVehicles() {
 
       <div style={styles.grid}>
 
-        {vehicles.length === 0 ? (
+        {Array.isArray(vehicles) && vehicles.length === 0 ? (
           <p>No vehicles available</p>
         ) : (
-          vehicles.map((v) => (
+          Array.isArray(vehicles) &&
+            vehicles.map((v) => (
             <div key={v.id} style={styles.card}>
 
               {/* MAIN IMAGE */}

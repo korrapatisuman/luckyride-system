@@ -5,25 +5,37 @@ export default function TripTypeScreen({ route, navigation }) {
   const { vehicle, pickup } = route.params;
 
   const selectTrip = (type) => {
+
     navigation.navigate("BookingDetails", {
       vehicle,
       tripType: type,
       pickup
     });
+
   };
 
   return (
+
     <View style={styles.container}>
 
-      <Text style={styles.title}>Select Trip Type</Text>
+      <Text style={styles.title}>
+        Select Trip Type
+      </Text>
 
       {/* LOCAL */}
       <TouchableOpacity
         style={styles.card}
         onPress={() => selectTrip("Local")}
       >
-        <Text style={styles.text}>🚕 Local Trip</Text>
-        <Text style={styles.sub}>8 hrs / 80 km included</Text>
+
+        <Text style={styles.text}>
+          🚕 Local Trip
+        </Text>
+
+        <Text style={styles.sub}>
+          8 hrs / 80 km included
+        </Text>
+
       </TouchableOpacity>
 
       {/* OUTSTATION */}
@@ -31,31 +43,54 @@ export default function TripTypeScreen({ route, navigation }) {
         style={styles.card}
         onPress={() => selectTrip("Outstation")}
       >
-        <Text style={styles.text}>🚗 Outstation Trip</Text>
-        <Text style={styles.sub}>Min 300 km/day</Text>
+
+        <Text style={styles.text}>
+          🚗 Outstation Trip
+        </Text>
+
+        <Text style={styles.sub}>
+          Min 300 km/day
+        </Text>
+
       </TouchableOpacity>
 
     </View>
+
   );
 }
 
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
     justifyContent: "center",
-    padding: 20
+    padding: 20,
+    backgroundColor: "#fff"
   },
+
   title: {
     fontSize: 24,
+    fontWeight: "bold",
     marginBottom: 30,
     textAlign: "center"
   },
-  button: {
-    marginVertical: 10
+
+  card: {
+    backgroundColor: "#f2f2f2",
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20
   },
+
+  text: {
+    fontSize: 18,
+    fontWeight: "bold"
+  },
+
   sub: {
-  fontSize: 12,
-  color: "#777",
-  marginTop: 5
-}
+    fontSize: 12,
+    color: "#777",
+    marginTop: 5
+  }
+
 });

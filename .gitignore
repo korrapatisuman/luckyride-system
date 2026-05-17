@@ -1,14 +1,4 @@
-# Java / Spring Boot
-target/
-*.jar
-*.log
-
-# Node / React
-node_modules/
-
-# Environment
-.env
-
-# OS files
-.DS_Store
-Thumbs.db
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY target/*.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -1,66 +1,120 @@
 package com.luckyride.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "bookings")
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "bookings")
 public class Booking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 🔥 NEW (CRITICAL - JWT BASED USER)
+    // ================= USER =================
+
     @Column(name = "user_id")
     private Long userId;
 
-    // ⚠️ KEEP (optional - for admin/debug)
-    @JsonProperty("userPhone")
-    @Column(name = "user_phone")
     private String userPhone;
 
     private String userEmail;
 
-    // Vehicle
+    // ================= VEHICLE =================
+
     private Long vehicleId;
+
     private String vehicleType;
 
-    // Trip
+    // ================= TRIP =================
+
     private String tripType;
-    private String pickupDate;
+
+    // ✅ FIXED
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate pickupDate;
+
     private Integer days;
 
-    // Locations
+    // ================= LOCATION =================
+
+    @Column(columnDefinition = "TEXT")
     private String pickupLocation;
+
+    @Column(columnDefinition = "TEXT")
     private String dropLocation;
 
-    // Distance
+    // ================= DISTANCE =================
+
     private Double distance;
 
-    // Pricing
+    // ================= PRICE =================
+
     private Double totalPrice;
+
     private Double advancePaid;
 
-    // Status
-    private String status;
+    // ================= STATUS =================
 
-    // Driver
+    private String status = "BOOKED";
+
+    // ================= DRIVER =================
+
     private String driverName;
+
     private String driverPhone;
 
-    // Payment
-    private Double advanceAmount;
+    // ================= PAYMENT =================
 
-    @Column(name = "payment_done")
     private Boolean paymentDone = false;
 
     private String paymentMethod;
+
+    // ================= PLATFORM =================
+
+    private String platform;
+
+    // ================= TIMESTAMPS =================
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdAt;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime updatedAt;
+
+    // ================= AUTO TIMESTAMP =================
+
+    @PrePersist
+    public void onCreate() {
+
+        createdAt = LocalDateTime.now();
+
+        updatedAt = LocalDateTime.now();
+
+        if (status == null) {
+            status = "BOOKED";
+        }
+
+        if (paymentDone == null) {
+            paymentDone = false;
+        }
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+
+        updatedAt = LocalDateTime.now();
+    }
 }

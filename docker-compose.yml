@@ -1,0 +1,23 @@
+services:
+
+  backend:
+    build: ./luckyride-backend
+    container_name: backend
+    ports:
+      - "9090:9090"
+
+  admin:
+    build: ./luckyride-admin
+    container_name: admin
+    ports:
+      - "3001:80"   # ✅ FIXED
+    depends_on:
+      - backend
+
+  website:
+    build: ./luckyride-website
+    container_name: website
+    ports:
+      - "3000:80"   # ✅ FIXED
+    depends_on:
+      - backend

@@ -1,102 +1,154 @@
 import React, { useState, useEffect } from "react";
+
 import {
   getAllBookings,
   updateBookingStatus,
   deleteBookingById,
   assignDriver
 } from "../services/api";
+
 import API from "../services/api";
 
 function BookingsPage() {
 
   const [bookings, setBookings] = useState([]);
-  const [driverInputs, setDriverInputs] = useState({});
   const [drivers, setDrivers] = useState([]);
+  const [driverInputs, setDriverInputs] = useState({});
 
+  // ✅ LOAD DATA
   useEffect(() => {
     fetchBookings();
+    fetchDrivers();
   }, []);
 
+  // ================= BOOKINGS =================
+
   const fetchBookings = async () => {
-  try {
-    const login = localStorage.getItem("login");
 
-    const res = await getAllBookings();
-    setBookings(res.data);
+    try {
 
-  } catch (error) {
-    console.error("Error fetching bookings:", error);
-  }
-};
+      const res = await getAllBookings();
+
+      console.log("BOOKINGS RESPONSE 👉", res.data);
+
+      // ✅ HANDLE BOTH ARRAY + API RESPONSE
+      const data = Array.isArray(res.data)
+        ? res.data
+        : res.data.data || [];
+
+      setBookings(data);
+
+    } catch (error) {
+
+      console.error("Error fetching bookings:", error);
+    }
+  };
+
+  // ================= DRIVERS =================
+
+  const fetchDrivers = async () => {
+
+    try {
+
+      const res = await API.get("/admin/drivers");
+
+      console.log("DRIVERS RESPONSE 👉", res.data);
+
+      // ✅ HANDLE BOTH ARRAY + API RESPONSE
+      const data = Array.isArray(res.data)
+        ? res.data
+        : res.data.data || [];
+
+      setDrivers(data);
+
+    } catch (err) {
+
+      console.error("Fetch drivers error:", err);
+    }
+  };
+
+  // ================= UPDATE STATUS =================
 
   const updateStatus = async (id, status) => {
+
     try {
+
       await updateBookingStatus(id, status);
+
+      alert("Booking status updated ✅");
+
       fetchBookings();
+
     } catch (error) {
+
       console.error("Error updating status:", error);
     }
   };
 
+  // ================= DELETE BOOKING =================
+
   const deleteBooking = async (id) => {
+
     try {
+
       await deleteBookingById(id);
+
+      alert("Booking deleted ✅");
+
       fetchBookings();
+
     } catch (error) {
+
       console.error("Error deleting booking:", error);
     }
   };
 
-  useEffect(() => {
-  fetchDrivers();
-  fetchBookings();
-}, []);
-
-  const fetchDrivers = async () => {
-  try {
-    const res = await API.get("/admin/drivers");
-    setDrivers(res.data);
-  } catch (err) {
-    console.error("Fetch drivers error:", err);
-  }
-};
+  // ================= ASSIGN DRIVER =================
 
   const handleAssignDriver = async (bookingId) => {
-  try {
-    const input = driverInputs[bookingId] || {};
 
-    let payload;
+    try {
 
-    // ✅ Case 1: Existing driver
-    if (input.driverId) {
-      payload = {
-        driverId: input.driverId
-      };
+      const input = driverInputs[bookingId] || {};
+
+      let payload;
+
+      // ✅ EXISTING DRIVER
+      if (input.driverId) {
+
+        payload = {
+          driverId: input.driverId
+        };
+      }
+
+      // ✅ NEW DRIVER
+      else if (input.name && input.phone) {
+
+        payload = {
+          name: input.name,
+          phone: input.phone
+        };
+      }
+
+      else {
+
+        alert("Select driver or enter driver details");
+
+        return;
+      }
+
+      await assignDriver(bookingId, payload);
+
+      alert("Driver assigned successfully ✅");
+
+      fetchBookings();
+      fetchDrivers();
+
+    } catch (err) {
+
+      console.error("Assign error:", err);
     }
-
-    // ✅ Case 2: New driver
-    else if (input.name && input.phone) {
-      payload = {
-        name: input.name,
-        phone: input.phone
-      };
-    } else {
-      alert("Select driver or enter new driver details");
-      return;
-    }
-
-    await assignDriver(bookingId, payload);
-
-    alert("Driver assigned successfully ✅");
-
-    // 🔄 Refresh bookings + drivers
-    fetchBookings();
-    fetchDrivers();
-
-  } catch (err) {
-    console.error("Assign error:", err);
-  }
-};
+  };
 
   return (
     <div style={styles.container}>
@@ -185,75 +237,111 @@ function BookingsPage() {
                 </td>
 
                   {/* DRIVER ASSIGN */}
-<td style={styles.cell}>
+                  <td style={styles.cell}>
+
   <div style={styles.driverBox}>
 
-    {/* ✅ DRIVER DROPDOWN (THIS USES drivers STATE) */}
+    {/* ✅ MAIN ACTION */}
     <select
       style={styles.input}
-      value={driverInputs[b.id]?.driverId || ""}
+      value={driverInputs[b.id]?.mode || ""}
       onChange={(e) =>
         setDriverInputs({
           ...driverInputs,
           [b.id]: {
             ...driverInputs[b.id],
-            driverId: e.target.value,
-            name: "",
-            phone: ""
+            mode: e.target.value
           }
         })
       }
     >
-      <option value="">Select Driver</option>
-      {drivers.map((d) => (   // 🔥 NOW drivers IS USED
-        <option key={d.id} value={d.id}>
-          {d.name} ({d.phone})
-        </option>
-      ))}
+      <option value="">Action</option>
+      <option value="existing">Select Existing Driver</option>
+      <option value="new">Add New Driver</option>
     </select>
 
-    {/* ✅ NEW DRIVER NAME */}
-    <input
-      style={styles.input}
-      placeholder="New Driver Name"
-      onChange={(e) =>
-        setDriverInputs({
-          ...driverInputs,
-          [b.id]: {
-            ...driverInputs[b.id],
-            name: e.target.value,
-            driverId: ""
-          }
-        })
-      }
-    />
+    {/* ================= EXISTING DRIVER ================= */}
+    {driverInputs[b.id]?.mode === "existing" && (
 
-    {/* ✅ NEW DRIVER PHONE */}
-    <input
-      style={styles.input}
-      placeholder="New Driver Phone"
-      onChange={(e) =>
-        setDriverInputs({
-          ...driverInputs,
-          [b.id]: {
-            ...driverInputs[b.id],
-            phone: e.target.value,
-            driverId: ""
+      <>
+        <select
+          style={styles.input}
+          value={driverInputs[b.id]?.driverId || ""}
+          onChange={(e) =>
+            setDriverInputs({
+              ...driverInputs,
+              [b.id]: {
+                ...driverInputs[b.id],
+                driverId: e.target.value
+              }
+            })
           }
-        })
-      }
-    />
+        >
+          <option value="">Select Driver</option>
 
-    {/* ✅ ASSIGN BUTTON */}
-    <button
-      style={styles.assignBtn}
-      onClick={() => handleAssignDriver(b.id)}
-    >
-      Assign
-    </button>
+          {drivers.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name} ({d.phone})
+            </option>
+          ))}
+        </select>
+
+        <button
+          style={styles.assignBtn}
+          onClick={() => handleAssignDriver(b.id)}
+        >
+          Assign
+        </button>
+      </>
+    )}
+
+    {/* ================= NEW DRIVER ================= */}
+    {driverInputs[b.id]?.mode === "new" && (
+
+      <>
+        <input
+          style={styles.input}
+          placeholder="Driver Name"
+          value={driverInputs[b.id]?.name || ""}
+          onChange={(e) =>
+            setDriverInputs({
+              ...driverInputs,
+              [b.id]: {
+                ...driverInputs[b.id],
+                name: e.target.value
+              }
+            })
+          }
+        />
+
+        <input
+          style={styles.input}
+          placeholder="Driver Phone"
+          value={driverInputs[b.id]?.phone || ""}
+          onChange={(e) =>
+            setDriverInputs({
+              ...driverInputs,
+              [b.id]: {
+                ...driverInputs[b.id],
+                phone: e.target.value
+              }
+            })
+          }
+        />
+
+        <button
+          style={styles.assignBtn}
+          onClick={() => handleAssignDriver(b.id)}
+        >
+          Assign
+        </button>
+      </>
+    )}
 
   </div>
+
 </td>
+
 
               </tr>
             ))}
